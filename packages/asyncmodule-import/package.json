@@ -1,0 +1,29 @@
+{
+  "name": "babel-plugin-asyncmodule-import",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "BABEL_ENV=commonjs babel-node demo/run.js --require babel-core/register",
+    "build": "babel index.js -d lib",
+    "test": "BABEL_ENV=commonjs mocha test/index.js --require babel-core/register"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@g.hz.netease.com:22222/hzshizhipeng/babel-plugin-asyncmodule-import.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0"
+  }
+}

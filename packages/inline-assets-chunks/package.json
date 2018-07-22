@@ -1,0 +1,20 @@
+{
+  "name": "inline-assets-webpack-plugin",
+  "version": "0.1.0",
+  "description": "split assets by webpack stats",
+  "author": "caoren",
+  "keywords": [
+    "react",
+    "async",
+    "module"
+  ],
+  "bugs": {
+    "url": "https://github.com/caoren/react-asyncmodule/issues"
+  },
+  "homepage": "https://github.com/caoren/react-asyncmodule",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caoren/react-asyncmodule.git"
+  },
+  "main": "src/index.js",
+}
