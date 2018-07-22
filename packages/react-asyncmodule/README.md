@@ -40,7 +40,7 @@ const List = AsyncModule({
     resolveWeak: () => require.resolveWeak('./list')
 });
 ```
-好多了，但还可以再精简一下，这次需要用到`babel-plugin-asyncmodule-import`插件。
+好多了，但还可以再精简一下，这次需要用到[babel-plugin-asyncmodule-import](https://github.com/caoren/react-asyncmodule/tree/master/packages/asyncmodule-import)插件。
 
 ```javascript
 const Home = AsyncComponent(import('./home'));

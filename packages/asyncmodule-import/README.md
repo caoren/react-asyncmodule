@@ -1,10 +1,10 @@
-# @music/babel-plugin-asyncmodule-import
+# babel-plugin-asyncmodule-import
 
 > mrc的babel插件，用于异步模块导入
 
 
 ## 安装
-> nenpm install @music/babel-plugin-asyncmodule-import
+> nenpm install babel-plugin-asyncmodule-import
 
 ## 版本
 
@@ -18,7 +18,7 @@
             loader: 'babel-loader',
             options: {
                 plugins: [
-                    ['@music/asyncmodule-import', { ... }]
+                    ['asyncmodule-import', { ... }]
                     ...
                 ]
             }
