@@ -7,7 +7,8 @@
     "commonjs": {
       "presets": [
         ["env", {
-          modules : "commonjs"
+          modules : "commonjs",
+          useBuiltIns: true
         }]
       ],
       "plugins": [
