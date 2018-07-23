@@ -1,29 +1,30 @@
 # babel-plugin-asyncmodule-import
 
-> mrc的babel插件，用于异步模块导入
+> A Babel Plugin，for [react-asyncmodule](https://github.com/caoren/react-asyncmodule.git), can be used for tranfroming async module importing.
 
 
-## 安装
-> nenpm install babel-plugin-asyncmodule-import
+## install
+> npm i babel-plugin-asyncmodule-import
 
-## 版本
+## version
+> 0.1.1
 
-## babel-loader中使用
+## used in webpack babel-loader
 
-``` javascript
-    {
-        test: /\.(js|jsx)?$/,
-        exclude: /node_modules/,
-        use: [{
-            loader: 'babel-loader',
-            options: {
-                plugins: [
-                    ['asyncmodule-import', { ... }]
-                    ...
-                ]
-            }
-        }]
-    }
+```javascript
+{
+    test: /\.(js|jsx)?$/,
+    exclude: /node_modules/,
+    use: [{
+        loader: 'babel-loader',
+        options: {
+            plugins: [
+                ['asyncmodule-import', { ... }]
+                ...
+            ]
+        }
+    }]
+}
 ```
 
 ## 参数
