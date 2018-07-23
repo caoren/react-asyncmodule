@@ -1,6 +1,6 @@
 test/
-src/
+demo/
+index.js
 .babelrc
-.eslintrc.js
 .gitignore
 .npmignore

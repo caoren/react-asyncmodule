@@ -11,7 +11,7 @@
 
 ## used in webpack babel-loader
 
-``` javascript
+```javascript
 {
     test: /\.(js|jsx)?$/,
     exclude: /node_modules/,
