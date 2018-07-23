@@ -1,5 +1,5 @@
 import AsyncModule from 'react-asyncmodule';
-import ImportCss from 'babel-plugin-asyncmodule-import/importcss';
+import ImportCss from 'babel-plugin-asyncmodule-import/lib/importcss';
 const AsyncComponent = AsyncModule({
     delay: 300
 });
