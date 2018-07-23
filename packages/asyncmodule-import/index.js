@@ -9,11 +9,12 @@ export default function (_ref) {
       type: "CommentBlock",
       value: `webpackChunkName: "${moduleName}"`
     }];
-    return {modulePath, moduleName};
+    return { modulePath, moduleName };
   };
 
-  const buildLoad = (importPath, moduleName, importCss = true)=> {
+  const buildLoad = (importPath, moduleName, importCss = false)=> {
     let loadMaterials = [importPath.node];
+
     if (importCss) {
       loadMaterials.push(t.callExpression(t.identifier('ImportCss'),[t.stringLiteral(moduleName)]) )
     }
@@ -79,7 +80,7 @@ export default function (_ref) {
           const programPath = path.find((p) => {
               return p.parentKey === 'body';
           });
-          if (importCss!==false && programPath) {
+          if (importCss && programPath) {
             const declaration = t.importDeclaration(
               [t.importDefaultSpecifier(t.identifier('ImportCss'))],
               t.stringLiteral('babel-plugin-asyncmodule-import/importcss')

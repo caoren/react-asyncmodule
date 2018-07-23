@@ -30,11 +30,14 @@
 
 Name             | Type       | Default          | Description
 -----------------|------------|------------------|--------------
-[importCss]       | `Boolean`   |  `true`  | 是否调用ImportCss加载css
+[importCss]       | `Boolean`   |  `false`  | 是否调用ImportCss加载css
 
 ## 说明
 该插件用于以下转换
+
+
 ```javascript
+// when importCss set true
 import AsyncModule from 'react-asyncmodule'; 
 const AsyncComponent = AsyncModule({
     delay: 300,
@@ -52,6 +55,28 @@ const AsyncComponent = AsyncModule({
 });
 const Home = AsyncComponent({
     load: () => Promise.all([import( /*webpackChunkName: "home"*/'./views/home'), ImportCss('home')]).then(jsprim => jsprim[0]),
+    resolveWeak: () => require.resolveWeak('./views/home')
+});
+```
+
+```javascript
+// when importCss set default false
+import AsyncModule from 'react-asyncmodule';
+const AsyncComponent = AsyncModule({
+    delay: 300,
+    ...
+});
+const Home = AsyncComponent(import('./views/home'));
+```
+
+```javascript
+import AsyncModule from 'react-asyncmodule';
+const AsyncComponent = AsyncModule({
+    delay: 300,
+    ...
+});
+const Home = AsyncComponent({
+    load: () => Promise.all([import( /*webpackChunkName: "home"*/'./views/home')]).then(jsprim => jsprim[0]),
     resolveWeak: () => require.resolveWeak('./views/home')
 });
 ```
