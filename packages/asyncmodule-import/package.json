@@ -10,10 +10,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "ssh://git@g.hz.netease.com:22222/hzshizhipeng/babel-plugin-asyncmodule-import.git"
+    "url": "ssh://git@https://github.com/caoren/react-asyncmodule.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "shizhipeng",
   "license": "ISC",
   "devDependencies": {
     "babel-cli": "^6.26.0",
