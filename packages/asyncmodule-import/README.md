@@ -1,40 +1,44 @@
 # babel-plugin-asyncmodule-import
 
-> mrc的babel插件，用于异步模块导入
+> A Babel Plugin，for [react-asyncmodule](https://github.com/caoren/react-asyncmodule.git), can be used for tranfroming async module importing.
 
 
-## 安装
-> nenpm install babel-plugin-asyncmodule-import
+## install
+> npm i babel-plugin-asyncmodule-import
 
-## 版本
+## version
+> 0.1.1
 
-## babel-loader中使用
+## used in webpack babel-loader
 
-``` javascript
-    {
-        test: /\.(js|jsx)?$/,
-        exclude: /node_modules/,
-        use: [{
-            loader: 'babel-loader',
-            options: {
-                plugins: [
-                    ['asyncmodule-import', { ... }]
-                    ...
-                ]
-            }
-        }]
-    }
+```javascript
+{
+    test: /\.(js|jsx)?$/,
+    exclude: /node_modules/,
+    use: [{
+        loader: 'babel-loader',
+        options: {
+            plugins: [
+                ['asyncmodule-import', { ... }]
+                ...
+            ]
+        }
+    }]
+}
 ```
 
 ## 参数
 
 Name             | Type       | Default          | Description
 -----------------|------------|------------------|--------------
-[importCss]       | `Boolean`   |  `true`  | 是否调用ImportCss加载css
+[importCss]       | `Boolean`   |  `false`  | 是否调用ImportCss加载css
 
 ## 说明
 该插件用于以下转换
+
+
 ```javascript
+// when importCss set true
 import AsyncModule from 'react-asyncmodule'; 
 const AsyncComponent = AsyncModule({
     delay: 300,
@@ -52,6 +56,28 @@ const AsyncComponent = AsyncModule({
 });
 const Home = AsyncComponent({
     load: () => Promise.all([import( /*webpackChunkName: "home"*/'./views/home'), ImportCss('home')]).then(jsprim => jsprim[0]),
+    resolveWeak: () => require.resolveWeak('./views/home')
+});
+```
+
+```javascript
+// when importCss set default false
+import AsyncModule from 'react-asyncmodule';
+const AsyncComponent = AsyncModule({
+    delay: 300,
+    ...
+});
+const Home = AsyncComponent(import('./views/home'));
+```
+
+```javascript
+import AsyncModule from 'react-asyncmodule';
+const AsyncComponent = AsyncModule({
+    delay: 300,
+    ...
+});
+const Home = AsyncComponent({
+    load: () => Promise.all([import( /*webpackChunkName: "home"*/'./views/home')]).then(jsprim => jsprim[0]),
     resolveWeak: () => require.resolveWeak('./views/home')
 });
 ```

@@ -30,14 +30,14 @@ describe('asyncmodule import', () => {
         expect(out.code).to.be.equal(expectStr);
     });
 
-    it('no css import', () => {
-        const src = readFileSync(path.join(__dirname, 'cases/noImportCss.js'), 'utf-8');
+    it('css import', () => {
+        const src = readFileSync(path.join(__dirname, 'cases/importCss.js'), 'utf-8');
         const out = babel.transform(src, {
             plugins: ['syntax-dynamic-import',[asyncModuleImport, {
-                importCss: false
+                importCss: true
             }]]
         });
-        const expectStr = readFileSync(path.join(__dirname, 'cases/noImportCss_res.js'), 'utf-8');
+        const expectStr = readFileSync(path.join(__dirname, 'cases/importCss_res.js'), 'utf-8');
         expect(out.code).to.be.equal(expectStr);
     });
 });
