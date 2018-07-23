@@ -1,0 +1,6 @@
+test/
+demo/
+src/
+.babelrc
+.gitignore
+.npmignore
