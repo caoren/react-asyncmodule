@@ -1,0 +1,11 @@
+{
+    "presets": [
+        ["env", {
+            modules : "commonjs"
+        }],
+        "stage-0"
+    ],
+    "plugins": [
+        "add-module-exports"
+    ]
+}

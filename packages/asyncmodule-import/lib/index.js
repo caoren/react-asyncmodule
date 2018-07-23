@@ -22,9 +22,10 @@ exports.default = function (_ref) {
   };
 
   var buildLoad = function buildLoad(importPath, moduleName) {
-    var importCss = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+    var importCss = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
     var loadMaterials = [importPath.node];
+
     if (importCss) {
       loadMaterials.push(t.callExpression(t.identifier('ImportCss'), [t.stringLiteral(moduleName)]));
     }
@@ -66,7 +67,7 @@ exports.default = function (_ref) {
           var programPath = path.find(function (p) {
             return p.parentKey === 'body';
           });
-          if (importCss !== false && programPath) {
+          if (importCss && programPath) {
             var declaration = t.importDeclaration([t.importDefaultSpecifier(t.identifier('ImportCss'))], t.stringLiteral('babel-plugin-asyncmodule-import/importcss'));
             programPath.insertBefore(declaration);
           }
