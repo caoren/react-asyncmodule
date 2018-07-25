@@ -159,7 +159,7 @@ var Dueimport = function Dueimport() {
                     _this2.changeState({
                         request: false,
                         err: '',
-                        LoadComponent: component
+                        LoadComponent: (0, _util.getModule)(component)
                     });
                 }).catch(function (e) {
                     _this2.clearTime();

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { resolving, shallowCopy } from './util';
+import { resolving, shallowCopy, getModule } from './util';
 
 const TIMEOUT = 120000;
 const DELAY = 200;
@@ -110,7 +110,7 @@ const Dueimport = (option = {}) => {
                 this.changeState({
                     request: false,
                     err: '',
-                    LoadComponent: component
+                    LoadComponent: getModule(component)
                 });
             }).catch((e) => {
                 this.clearTime();

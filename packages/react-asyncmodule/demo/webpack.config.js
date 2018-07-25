@@ -48,8 +48,7 @@ const config = {
                             'react'
                         ],
                         plugins: [
-                            'syntax-dynamic-import',
-                            'add-module-exports'
+                            'syntax-dynamic-import'
                         ],
                         cacheDirectory: true
                     }
