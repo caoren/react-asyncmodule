@@ -2,7 +2,7 @@ require("babel-register");
 var fs = require("fs");
 var path = require('path');
 var babel = require("babel-core");
-var asyncimportloader = require("../index");
+var asyncimportloader = require("../src/index");
 
 fs.readFile(path.join(__dirname, 'asyncImport.js'), function(err, data) {
     if(err) throw err;

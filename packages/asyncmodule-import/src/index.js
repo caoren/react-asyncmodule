@@ -83,7 +83,7 @@ export default function (_ref) {
           if (importCss && programPath) {
             const declaration = t.importDeclaration(
               [t.importDefaultSpecifier(t.identifier('ImportCss'))],
-              t.stringLiteral('babel-plugin-asyncmodule-import/importcss')
+              t.stringLiteral('babel-plugin-asyncmodule-import/lib/importcss')
             );
             programPath.insertBefore(declaration);
           }
