@@ -8,10 +8,12 @@ export default function (_ref) {
   var addComments = function addComments(module) {
     var modulePath = module.value;
     var moduleName = modulePath.split('/')[modulePath.split('/').length - 1];
-    module.leadingComments = [{
-      type: "CommentBlock",
-      value: 'webpackChunkName: "' + moduleName + '"'
-    }];
+    if (!module.leadingComments) {
+      module.leadingComments = [{
+        type: "CommentBlock",
+        value: 'webpackChunkName: "' + moduleName + '"'
+      }];
+    }
     return { modulePath: modulePath, moduleName: moduleName };
   };
 

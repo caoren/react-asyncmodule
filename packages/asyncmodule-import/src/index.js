@@ -5,10 +5,12 @@ export default function (_ref) {
   const addComments = module =>{
     const modulePath = module.value;
     const moduleName = modulePath.split('/')[modulePath.split('/').length-1]; 
-    module.leadingComments = [{
-      type: "CommentBlock",
-      value: `webpackChunkName: "${moduleName}"`
-    }];
+    if (!module.leadingComments) {
+      module.leadingComments = [{
+        type: "CommentBlock",
+        value: `webpackChunkName: "${moduleName}"`
+      }];
+    }
     return { modulePath, moduleName };
   };
 
