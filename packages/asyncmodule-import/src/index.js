@@ -58,6 +58,16 @@ export default function (_ref) {
     )
   );
 
+  const buildChunkName = (moduleName) => (
+    t.objectProperty(
+       t.identifier('chunk'),
+       t.arrowFunctionExpression(
+         [],
+         t.stringLiteral(moduleName),
+       )
+    )
+  )
+
   return {
     visitor: {
       ImportDeclaration(path, {opts = {}}) {
@@ -102,8 +112,9 @@ export default function (_ref) {
 
           const load = buildLoad(importPath, moduleName, importCss);
           const resolveWeak = buildResolveWeak(modulePath);
+          const chunk = buildChunkName(moduleName);
 
-          importPath.replaceWith(t.objectExpression([load, resolveWeak]));
+          importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
           
         }
       }

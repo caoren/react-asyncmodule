@@ -4,5 +4,6 @@ const rand_Component = rand_AsyncModule({
 });
 const Homex = rand_Component({
     load: () => Promise.all([import( /*webpackChunkName: "homex"*/'./views/homex')]).then(jsprim => jsprim[0]),
-    resolveWeak: () => require.resolveWeak('./views/homex')
+    resolveWeak: () => require.resolveWeak('./views/homex'),
+    chunk: () => 'homex'
 });

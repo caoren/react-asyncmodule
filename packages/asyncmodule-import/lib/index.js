@@ -38,6 +38,10 @@ exports.default = function (_ref) {
     return t.objectProperty(t.identifier('resolveWeak'), t.arrowFunctionExpression([], t.callExpression(t.memberExpression(t.identifier('require'), t.identifier('resolveWeak')), [t.stringLiteral(modulePath)])));
   };
 
+  var buildChunkName = function buildChunkName(moduleName) {
+    return t.objectProperty(t.identifier('chunk'), t.arrowFunctionExpression([], t.stringLiteral(moduleName)));
+  };
+
   return {
     visitor: {
       ImportDeclaration: function ImportDeclaration(path, _ref2) {
@@ -91,8 +95,9 @@ exports.default = function (_ref) {
 
           var load = buildLoad(importPath, moduleName, importCss);
           var resolveWeak = buildResolveWeak(modulePath);
+          var chunk = buildChunkName(moduleName);
 
-          importPath.replaceWith(t.objectExpression([load, resolveWeak]));
+          importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
         }
       }
     }

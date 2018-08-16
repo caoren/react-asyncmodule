@@ -4,5 +4,6 @@ const AsyncComponent = AsyncModule({
 });
 const Home = AsyncComponent({
     load: () => Promise.all([import( /*webpackChunkName: "ilikethis"*/'./views/home')]).then(jsprim => jsprim[0]),
-    resolveWeak: () => require.resolveWeak('./views/home')
+    resolveWeak: () => require.resolveWeak('./views/home'),
+    chunk: () => 'home'
 });
