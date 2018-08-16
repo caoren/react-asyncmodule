@@ -40,4 +40,13 @@ describe('asyncmodule import', () => {
         const expectStr = readFileSync(path.join(__dirname, 'cases/importCss_res.js'), 'utf-8');
         expect(out.code).to.be.equal(expectStr);
     });
+
+    it('default comment import', () => {
+        const src = readFileSync(path.join(__dirname, 'cases/defaultcomment.js'), 'utf-8');
+        const out = babel.transform(src, {
+            plugins: ['syntax-dynamic-import',[asyncModuleImport]]
+        });
+        const expectStr = readFileSync(path.join(__dirname, 'cases/defaultcomment_res.js'), 'utf-8');
+        expect(out.code).to.be.equal(expectStr);
+    });
 });

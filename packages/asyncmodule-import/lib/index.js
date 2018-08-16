@@ -14,10 +14,12 @@ exports.default = function (_ref) {
   var addComments = function addComments(module) {
     var modulePath = module.value;
     var moduleName = modulePath.split('/')[modulePath.split('/').length - 1];
-    module.leadingComments = [{
-      type: "CommentBlock",
-      value: 'webpackChunkName: "' + moduleName + '"'
-    }];
+    if (!module.leadingComments) {
+      module.leadingComments = [{
+        type: "CommentBlock",
+        value: 'webpackChunkName: "' + moduleName + '"'
+      }];
+    }
     return { modulePath: modulePath, moduleName: moduleName };
   };
 
@@ -34,6 +36,10 @@ exports.default = function (_ref) {
 
   var buildResolveWeak = function buildResolveWeak(modulePath) {
     return t.objectProperty(t.identifier('resolveWeak'), t.arrowFunctionExpression([], t.callExpression(t.memberExpression(t.identifier('require'), t.identifier('resolveWeak')), [t.stringLiteral(modulePath)])));
+  };
+
+  var buildChunkName = function buildChunkName(moduleName) {
+    return t.objectProperty(t.identifier('chunk'), t.arrowFunctionExpression([], t.stringLiteral(moduleName)));
   };
 
   return {
@@ -89,8 +95,9 @@ exports.default = function (_ref) {
 
           var load = buildLoad(importPath, moduleName, importCss);
           var resolveWeak = buildResolveWeak(modulePath);
+          var chunk = buildChunkName(moduleName);
 
-          importPath.replaceWith(t.objectExpression([load, resolveWeak]));
+          importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
         }
       }
     }

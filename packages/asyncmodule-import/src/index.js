@@ -5,10 +5,12 @@ export default function (_ref) {
   const addComments = module =>{
     const modulePath = module.value;
     const moduleName = modulePath.split('/')[modulePath.split('/').length-1]; 
-    module.leadingComments = [{
-      type: "CommentBlock",
-      value: `webpackChunkName: "${moduleName}"`
-    }];
+    if (!module.leadingComments) {
+      module.leadingComments = [{
+        type: "CommentBlock",
+        value: `webpackChunkName: "${moduleName}"`
+      }];
+    }
     return { modulePath, moduleName };
   };
 
@@ -56,6 +58,16 @@ export default function (_ref) {
     )
   );
 
+  const buildChunkName = (moduleName) => (
+    t.objectProperty(
+       t.identifier('chunk'),
+       t.arrowFunctionExpression(
+         [],
+         t.stringLiteral(moduleName),
+       )
+    )
+  )
+
   return {
     visitor: {
       ImportDeclaration(path, {opts = {}}) {
@@ -100,8 +112,9 @@ export default function (_ref) {
 
           const load = buildLoad(importPath, moduleName, importCss);
           const resolveWeak = buildResolveWeak(modulePath);
+          const chunk = buildChunkName(moduleName);
 
-          importPath.replaceWith(t.objectExpression([load, resolveWeak]));
+          importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
           
         }
       }
