@@ -70,43 +70,25 @@ export default function (_ref) {
 
   return {
     visitor: {
-      ImportDeclaration(path, {opts = {}}) {
-        const { node } = path;
-        if (!node || node.specifiers.length === 0) {
-          return;
-        }
-        const { source } = node;
-        if (t.isStringLiteral(source, {value: 'react-asyncmodule'})) {
-          asyncModule = node.specifiers[0].local.name;
-        }
-      },
       CallExpression(path, {opts = {}}) {
         const { node } = path;
         const { importCss } = opts;
         if (!node) {
           return;
         }
-        if (t.isIdentifier(node.callee, {name: asyncModule})) {
-          const calleeParent = path.parentPath.node;
-          asyncComponent = calleeParent.id.name;
-          const programPath = path.find((p) => {
-              return p.parentKey === 'body';
-          });
-          if (importCss && programPath) {
+        if (t.isCallExpression(node.arguments[0]) && t.isImport(node.arguments[0].callee)) {
+          if (importCss) {
             const declaration = t.importDeclaration(
               [t.importDefaultSpecifier(t.identifier('ImportCss'))],
               t.stringLiteral('babel-plugin-asyncmodule-import/lib/importcss')
             );
-            programPath.insertBefore(declaration);
-          }
-        }
-        if (t.isIdentifier(node.callee, {name: asyncComponent})) {
-          // save the 1st arg import call
-          const importPath = path.get('arguments.0');
-          if (!importPath || !t.isImport(importPath.node.callee)) {
-            return;
+            const programPath = path.find((p) => {
+                return t.isProgram(p.node);
+            });
+            programPath.unshiftContainer('body', declaration);
           }
           // add leadingComments to the import argument module
+          const importPath = path.get('arguments.0');
           const [module] = importPath.node.arguments;
           const { modulePath, moduleName } = addComments(module);
 
@@ -115,7 +97,6 @@ export default function (_ref) {
           const chunk = buildChunkName(moduleName);
 
           importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
-          
         }
       }
     }

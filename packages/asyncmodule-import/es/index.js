@@ -38,47 +38,25 @@ export default function (_ref) {
 
   return {
     visitor: {
-      ImportDeclaration: function ImportDeclaration(path, _ref2) {
+      CallExpression: function CallExpression(path, _ref2) {
         var _ref2$opts = _ref2.opts,
             opts = _ref2$opts === undefined ? {} : _ref2$opts;
-        var node = path.node;
-
-        if (!node || node.specifiers.length === 0) {
-          return;
-        }
-        var source = node.source;
-
-        if (t.isStringLiteral(source, { value: 'react-asyncmodule' })) {
-          asyncModule = node.specifiers[0].local.name;
-        }
-      },
-      CallExpression: function CallExpression(path, _ref3) {
-        var _ref3$opts = _ref3.opts,
-            opts = _ref3$opts === undefined ? {} : _ref3$opts;
         var node = path.node;
         var importCss = opts.importCss;
 
         if (!node) {
           return;
         }
-        if (t.isIdentifier(node.callee, { name: asyncModule })) {
-          var calleeParent = path.parentPath.node;
-          asyncComponent = calleeParent.id.name;
-          var programPath = path.find(function (p) {
-            return p.parentKey === 'body';
-          });
-          if (importCss && programPath) {
+        if (t.isCallExpression(node.arguments[0]) && t.isImport(node.arguments[0].callee)) {
+          if (importCss) {
             var declaration = t.importDeclaration([t.importDefaultSpecifier(t.identifier('ImportCss'))], t.stringLiteral('babel-plugin-asyncmodule-import/lib/importcss'));
-            programPath.insertBefore(declaration);
-          }
-        }
-        if (t.isIdentifier(node.callee, { name: asyncComponent })) {
-          // save the 1st arg import call
-          var importPath = path.get('arguments.0');
-          if (!importPath || !t.isImport(importPath.node.callee)) {
-            return;
+            var programPath = path.find(function (p) {
+              return t.isProgram(p.node);
+            });
+            programPath.unshiftContainer('body', declaration);
           }
           // add leadingComments to the import argument module
+          var importPath = path.get('arguments.0');
 
           var _importPath$node$argu = _slicedToArray(importPath.node.arguments, 1),
               module = _importPath$node$argu[0];
