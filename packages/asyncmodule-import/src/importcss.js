@@ -1,10 +1,11 @@
+// copy by 
 const LOADED = {};
 const getResource = (rsName) => {
-    if (typeof window === 'undefined' || !window.ASSETS_CHUNKS) {
+    if (typeof window === 'undefined' || !window.__ASSETS_CHUNKS__) {
         return null;
     }
-    const CSSChunks = window.ASSETS_CHUNKS;
-    return CSSChunks.css[rsName];
+    const CSSChunks = window.__ASSETS_CHUNKS__;
+    return CSSChunks[rsName];
 };
 const ImportCss = (rsName) => {
     const href = getResource(rsName);

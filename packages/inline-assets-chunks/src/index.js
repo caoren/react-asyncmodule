@@ -1,61 +1,93 @@
 /* eslint-disable */
-var fs = require('fs');
-var path = require('path');
-// 获取css chunks
-function createCssHash (Stats) {
-    var {
-        assetsByChunkName,
-        publicPath
-    } = Stats;
-    return Object.keys(assetsByChunkName).reduce((hash, name) => {
-        var nhash = hash;
-        if (!assetsByChunkName[name] || !assetsByChunkName[name].find) return nhash;
-        var findCssFile = assetsByChunkName[name].find(file => file.endsWith('.css'));
-        if (findCssFile) {
-            nhash.css[name] = `${publicPath}${findCssFile}`;
-        }
-        var findJsFile = assetsByChunkName[name].find(file => file.endsWith('.js'));
-        if (findJsFile) {
-            nhash.js[name] = `${publicPath}${findJsFile}`;
-        } 
-        return nhash;
-    }, { js: {}, css: {}});
+import fs from 'fs';
+import path from 'path';
+import {
+    createAssetsHash
+} from './util';
+
+const INLINECHUNKSNAME = 'window.__ASSETS_CHUNKS__';
+const defaultOptions = {
+    name: 'webpackInlineAssetsChunks',
+    inject: 'body',
+    output: ''
 };
-function InlineCSSChunks (options) {
-    options = options || {};
-    this.globalName = options.globalName || 'ASSETS_CHUNKS';
-    this.name = options.name || 'webpackAssetsChunks';
-    this.outputJson = options.outputJson || '';
-}
-InlineCSSChunks.prototype.apply = function (compiler) {
-    var self = this;
-    compiler.plugin('compilation', function (compilation) {
-        compilation.plugin('html-webpack-plugin-before-html-generation', function (htmlPluginData, callback) {
-            var assets = htmlPluginData.assets;
-            var name = self.name;
-            var CssChunks = [];
-            var cssHashs = createCssHash(compilation.getStats().toJson());
-            if (cssHashs) {
-                var assetsStr = JSON.stringify(cssHashs, null, 2);
-                CssChunks.push('<script type="text/javascript">');
-                CssChunks.push('window.'+ self.globalName +'='+ assetsStr);
-                CssChunks.push('</script>');
-                assets[name] = CssChunks.join('');
-                var outputJson = self.outputJson;
-                if (outputJson !== '') {
-                    const outputDirectory = path.dirname(outputJson);
-                    try {
-                        fs.mkdirSync(outputDirectory);
-                    } catch (err) {
-                        if (err.code !== 'EEXIST') {
-                            throw err;
-                        }
-                    }
-                    fs.writeFileSync(outputJson, assetsStr);
+class InlineAssetsChunks {
+    constructor(options = {}) {
+        this.options = Object.assign({}, defaultOptions, options);
+    }
+    getScriptTag(assetsStr) {
+        return {
+            tagName: 'script',
+            closeTag: true,
+            attributes: {
+                type: 'text/javascript',
+            },
+            innerHTML: `${INLINECHUNKSNAME} = ${assetsStr}`
+        };
+    }
+    getOldScript(INLINECHUNKSNAME) {
+        return `<script type="text/javascript">${INLINECHUNKSNAME} = ${INLINECHUNKSNAME};</script>`;
+    }
+    exportAssets(assets) {
+        const { output } = this.options;
+        if (output !== '') {
+            const outputDirectory = path.dirname(output);
+            try {
+                fs.mkdirSync(outputDirectory);
+            } catch (err) {
+                if (err.code !== 'EEXIST') {
+                    throw err;
                 }
             }
-            callback(null, htmlPluginData);
-        })
-    });
+            const assetsStr = JSON.stringify(assets, null, 2);
+            fs.writeFileSync(output, assetsStr);
+        }
+    }
+    apply(compiler) {
+        // v4
+        if (compiler.hooks) {
+            compiler.hooks.compilation.tap('AssetsChunksHtmlWebpackPlugin', compilation => {
+                let assetsHash;
+                compilation.hooks.htmlWebpackPluginBeforeHtmlProcessing.tapAsync(
+                'html-webpack-plugin-before-html-generation',
+                (htmlPluginData, callback) => {
+                    assetsHash = createAssetsHash(compilation.chunks, compilation.outputOptions.publicPath);
+                    htmlPluginData.assets.assetsHash = assetsHash;
+                    callback(null, htmlPluginData);
+                });
+                const { inject } = this.options;
+                compilation.hooks.htmlWebpackPluginAlterAssetTags.tapAsync(
+                    'html-webpack-plugin-alter-asset-tags',
+                (htmlPluginData, callback) => {
+                    const cssStr = JSON.stringify(assetsHash.css)
+                    const tag = this.getScriptTag(cssStr);
+                    if (inject === 'head') {
+                        htmlPluginData.head.push(tag);
+                    } else {
+                        htmlPluginData.body.unshift(tag);
+                    }
+                    this.exportAssets(assetsHash);
+                    callback(null, htmlPluginData);
+                });
+            });
+        } else {
+            compiler.plugin('compilation', (compilation) => {
+                let assetsHash;
+                compilation.plugin('html-webpack-plugin-before-html-generation', (htmlPluginData, callback) => {
+                    assetsHash = createAssetsHash(compilation.chunks, compilation.outputOptions.publicPath);
+                    htmlPluginData.assets.assetsHash = assetsHash;
+                    callback(null, htmlPluginData);
+                });
+                compilation.plugin('html-webpack-plugin-alter-asset-tags', (htmlPluginData, callback) => {
+                    const cssStr = JSON.stringify(assetsHash.css, null, 2);
+                    this.exportAssets(assetsHash);
+                    const { assets } = htmlPluginData;
+                    const { name } = this.options;
+                    assets[name] = this.getOldScript(cssStr);
+                    callback(null, htmlPluginData);
+                });
+            });
+        }
+    }
 }
-module.exports = InlineCSSChunks;
+export default InlineAssetsChunks;

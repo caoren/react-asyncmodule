@@ -48,7 +48,8 @@ var Dueimport = function Dueimport() {
         error = option.error,
         delay = option.delay,
         timeout = option.timeout,
-        resolveWeak = option.resolveWeak;
+        resolveWeak = option.resolveWeak,
+        chunk = option.chunk;
 
     if (!load) {
         return null;
@@ -202,6 +203,7 @@ var Dueimport = function Dueimport() {
         return AsyncComponent;
     }(Component);
 
+    AsyncComponent.chunk = chunk;
     AsyncComponent.preload = preload;
     return AsyncComponent;
 };

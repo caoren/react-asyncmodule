@@ -36,7 +36,8 @@ const Dueimport = (option = {}) => {
         error,
         delay,
         timeout,
-        resolveWeak
+        resolveWeak,
+        chunk
     } = option;
     if (!load) {
         return null;
@@ -153,6 +154,7 @@ const Dueimport = (option = {}) => {
             return <LoadComponent {...this.props} />;
         }
     }
+    AsyncComponent.chunk = chunk;
     AsyncComponent.preload = preload;
     return AsyncComponent;
 };
