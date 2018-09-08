@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-asyncmodule-import",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "test": "BABEL_ENV=commonjs mocha test/index.js --require babel-core/register",
     "js:commonjs": "BABEL_ENV=commonjs babel src/ --out-dir lib/",
     "js:es": "BABEL_ENV=es babel src --out-dir es",
-    "build": "npm run test && npm run js:commonjs && npm run js:es"
+    "build": "npm run js:commonjs && npm run js:es && npm run test"
   },
   "repository": {
     "type": "git",
