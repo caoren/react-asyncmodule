@@ -1,25 +1,20 @@
 {
   "presets": [
+    ["env", {
+      targets: {
+        browsers: [
+          'iOS >= 8.0',
+          'Android >= 4.4',
+          'ie >= 9',
+          'Edge >= 12'
+        ]
+      },
+      modules : "commonjs",
+      useBuiltIns: true
+    }],
     "stage-0"
   ],
-  "env": {
-    "commonjs": {
-      "presets": [
-        ["env", {
-          modules : "commonjs",
-          useBuiltIns: true
-        }]
-      ],
-      "plugins": [
-        "add-module-exports"
-      ]
-    },
-    "test": {
-      "presets": [
-        ["env", {
-          modules : "commonjs"
-        }]
-      ]
-    }
-  }
+  "plugins": [
+    "add-module-exports"
+  ]
 }

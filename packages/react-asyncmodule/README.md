@@ -10,6 +10,7 @@ import AsyncModule from 'react-asyncmodule';
 const Home = AsyncModule({
     load: () => import(/* webpackChunkName: "home" */ './home'),
     resolveWeak: () => require.resolveWeak('./home'),
+    chunk: () => 'home',
     loading: <Loading />,
     error: <ErrorView />
 });
@@ -17,6 +18,7 @@ const Home = AsyncModule({
 const List = AsyncModule({
     load: () => import(/* webpackChunkName: "list" */ './list'),
     resolveWeak: () => require.resolveWeak('./list'),
+    chunk: () => 'list',
     loading: <Loading />,
     error: <ErrorView />
 });
@@ -32,12 +34,14 @@ const AsyncComponent = AsyncModule({
 
 const Home = AsyncComponent({
     load: () => import(/* webpackChunkName: "home" */ './home'),
-    resolveWeak: () => require.resolveWeak('./home')
+    resolveWeak: () => require.resolveWeak('./home'),
+    chunk: () => 'home'
 });
 
 const List = AsyncModule({
     load: () => import(/* webpackChunkName: "list" */ './list'),
-    resolveWeak: () => require.resolveWeak('./list')
+    resolveWeak: () => require.resolveWeak('./list'),
+    chunk: () => 'list'
 });
 ```
 好多了，但还可以再精简一下，这次需要用到[babel-plugin-asyncmodule-import](https://github.com/caoren/react-asyncmodule/tree/master/packages/asyncmodule-import)插件。

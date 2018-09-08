@@ -4,7 +4,6 @@ webpack插件，用于提取asset chunks，通常用在单页应用的css分离�
 
 搭配[babel-plugin-asyncmodule-import](https://github.com/caoren/react-asyncmodule/tree/master/packages/asyncmodule-import/)的importcss。
 
-注：如css不做分离，则不需要使用该插件。
 
 ## 使用
 
@@ -37,11 +36,16 @@ module.exports = {
 
 ## Options
 
+### name
+
+默认'webpackInlineAssetsChunks'，挂载在`html-webpack-plugin`插件的`htmlWebpackPlugin.files`对象上，html模板中可使用`{{{htmlWebpackPlugin.files.webpackInlineAssetsChunks}}}`获取上面案例的脚本块，webpack v4- 使用
+
 ### inject
 
-'head | body'，生成的`script`块放置位置
+'head | body'，生成的`script`块放置位置。webpack v4 使用
 
 ### output
 
 输出资源asset chunks的目录文件，如`path.resolve(__dirname, './build/assets.json')`。
 通常给`production`的node端使用，不需要依赖开发环境的构建。
+

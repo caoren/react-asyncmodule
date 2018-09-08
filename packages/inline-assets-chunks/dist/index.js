@@ -51,8 +51,8 @@ var InlineAssetsChunks = function () {
         }
     }, {
         key: 'getOldScript',
-        value: function getOldScript(INLINECHUNKSNAME) {
-            return '<script type="text/javascript">' + INLINECHUNKSNAME + ' = ' + INLINECHUNKSNAME + ';</script>';
+        value: function getOldScript(assetsStr) {
+            return '<script type="text/javascript">' + INLINECHUNKSNAME + ' = ' + assetsStr + ';</script>';
         }
     }, {
         key: 'exportAssets',
@@ -102,13 +102,9 @@ var InlineAssetsChunks = function () {
                 });
             } else {
                 compiler.plugin('compilation', function (compilation) {
-                    var assetsHash = void 0;
                     compilation.plugin('html-webpack-plugin-before-html-generation', function (htmlPluginData, callback) {
-                        assetsHash = (0, _util.createAssetsHash)(compilation.chunks, compilation.outputOptions.publicPath);
+                        var assetsHash = (0, _util.createAssetsHash)(compilation.chunks, compilation.outputOptions.publicPath);
                         htmlPluginData.assets.assetsHash = assetsHash;
-                        callback(null, htmlPluginData);
-                    });
-                    compilation.plugin('html-webpack-plugin-alter-asset-tags', function (htmlPluginData, callback) {
                         var cssStr = JSON.stringify(assetsHash.css, null, 2);
                         _this.exportAssets(assetsHash);
                         var assets = htmlPluginData.assets;

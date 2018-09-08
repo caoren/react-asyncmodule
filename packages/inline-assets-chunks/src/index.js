@@ -25,8 +25,8 @@ class InlineAssetsChunks {
             innerHTML: `${INLINECHUNKSNAME} = ${assetsStr}`
         };
     }
-    getOldScript(INLINECHUNKSNAME) {
-        return `<script type="text/javascript">${INLINECHUNKSNAME} = ${INLINECHUNKSNAME};</script>`;
+    getOldScript(assetsStr) {
+        return `<script type="text/javascript">${INLINECHUNKSNAME} = ${assetsStr};</script>`;
     }
     exportAssets(assets) {
         const { output } = this.options;
@@ -72,13 +72,9 @@ class InlineAssetsChunks {
             });
         } else {
             compiler.plugin('compilation', (compilation) => {
-                let assetsHash;
                 compilation.plugin('html-webpack-plugin-before-html-generation', (htmlPluginData, callback) => {
-                    assetsHash = createAssetsHash(compilation.chunks, compilation.outputOptions.publicPath);
+                    const assetsHash = createAssetsHash(compilation.chunks, compilation.outputOptions.publicPath);
                     htmlPluginData.assets.assetsHash = assetsHash;
-                    callback(null, htmlPluginData);
-                });
-                compilation.plugin('html-webpack-plugin-alter-asset-tags', (htmlPluginData, callback) => {
                     const cssStr = JSON.stringify(assetsHash.css, null, 2);
                     this.exportAssets(assetsHash);
                     const { assets } = htmlPluginData;

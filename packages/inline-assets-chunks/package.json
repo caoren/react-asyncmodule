@@ -30,8 +30,9 @@
     "jest": "^23.5.0"
   },
   "scripts": {
-    "build": "cross-env BABEL_ENV=commonjs babel src/ --out-dir dist/",
-    "test": "jest"
+    "build:js": "cross-env BABEL_ENV=commonjs babel src/ --out-dir dist/",
+    "test": "jest",
+    "build": "npm test && npm run build:js"
   },
   "jest": {
     "collectCoverage": true,
