@@ -5,7 +5,7 @@ Asynchronous Loading `React` component.
 <p>
     <a href="https://www.npmjs.com/package/react-asyncmodule"><img src="https://img.shields.io/npm/v/react-asyncmodule.svg?style=flat"></a>
     <a href="https://www.npmjs.com/package/react-asyncmodule"><img src="https://img.shields.io/npm/dm/react-asyncmodule.svg?style=flat"></a>
-    <a href="https://travis-ci.org/ReactTraining/react-asyncmodule"><img src="https://img.shields.io/travis/caoren/react-asyncmodule/master.svg?style=flat"></a>
+    <a href="https://travis-ci.org/caoren/react-asyncmodule"><img src="https://img.shields.io/travis/caoren/react-asyncmodule/master.svg?style=flat"></a>
 </p>
 
 ## Packages

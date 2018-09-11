@@ -85,6 +85,9 @@
       "js",
       "jsx"
     ],
+    "testEnvironmentOptions": {
+      "url": "http://localhost"
+    },
     "testMatch": [
       "<rootDir>/test/*.js?(x)"
     ],
