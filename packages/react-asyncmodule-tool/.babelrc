@@ -1,0 +1,32 @@
+{
+  "presets": [
+    "stage-0",
+  ],
+  "env": {
+    "commonjs": {
+      "presets": [
+        ["env", {
+          modules : "commonjs",
+          useBuiltIns: true
+        }]
+      ],
+      "plugins": [
+        "add-module-exports"
+      ]
+    },
+    "es": {
+      "presets": [
+        ["env", {
+          modules : false
+        }]
+      ]
+    },
+    "test": {
+      "presets": [
+        ["env", {
+          modules : "commonjs"
+        }]
+      ]
+    }
+  }
+}

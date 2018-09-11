@@ -1,0 +1,55 @@
+{
+  "name": "react-asyncmodule-tool",
+  "version": "0.1.0",
+  "description": "react asyncmodule tool",
+  "author": "caoren",
+  "keywords": [
+    "react",
+    "asyncmodule",
+    "tool"
+  ],
+  "bugs": {
+    "url": "https://github.com/caoren/react-asyncmodule/issues"
+  },
+  "homepage": "https://github.com/caoren/react-asyncmodule",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caoren/react-asyncmodule.git"
+  },
+  "scripts": {
+    "js:commonjs": "cross-env BABEL_ENV=commonjs babel src/ --out-dir dist/",
+    "js:es": "cross-env BABEL_ENV=es babel src --out-dir es",
+    "test": "jest",
+    "build": "npm run test && npm run js:commonjs && npm run js:es"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.1",
+    "babel-jest": "^22.2.2",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-0": "^6.24.1",
+    "cross-env": "^5.0.5",
+    "jest": "^23.5.0"
+  },
+  "engines": {
+    "node": ">= 6.2.0",
+    "npm": ">= 3.0.0"
+  },
+  "jsnext:main": "es/index.js",
+  "main": "dist/index.js",
+  "jest": {
+    "collectCoverage": true,
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "testMatch": [
+      "<rootDir>/test/*.js?(x)"
+    ],
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    }
+  }
+}
