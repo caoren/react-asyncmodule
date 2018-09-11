@@ -2,8 +2,8 @@
 import fs from 'fs';
 import path from 'path';
 import {
-    createAssetsHash
-} from './util';
+    createAssets
+} from 'react-asyncmodule-tool';
 
 const INLINECHUNKSNAME = 'window.__ASSETS_CHUNKS__';
 const defaultOptions = {
@@ -51,7 +51,7 @@ class InlineAssetsChunks {
                 compilation.hooks.htmlWebpackPluginBeforeHtmlProcessing.tapAsync(
                 'html-webpack-plugin-before-html-generation',
                 (htmlPluginData, callback) => {
-                    assetsHash = createAssetsHash(compilation.chunks, compilation.outputOptions.publicPath);
+                    assetsHash = createAssets(compilation.chunks, compilation.outputOptions.publicPath);
                     htmlPluginData.assets.assetsHash = assetsHash;
                     callback(null, htmlPluginData);
                 });
@@ -73,7 +73,7 @@ class InlineAssetsChunks {
         } else {
             compiler.plugin('compilation', (compilation) => {
                 compilation.plugin('html-webpack-plugin-before-html-generation', (htmlPluginData, callback) => {
-                    const assetsHash = createAssetsHash(compilation.chunks, compilation.outputOptions.publicPath);
+                    const assetsHash = createAssets(compilation.chunks, compilation.outputOptions.publicPath);
                     htmlPluginData.assets.assetsHash = assetsHash;
                     const cssStr = JSON.stringify(assetsHash.css, null, 2);
                     this.exportAssets(assetsHash);

@@ -1,11 +1,11 @@
 # inline-assets-webpack-plugin
 
-webpack插件，用于提取asset chunks，通常用在单页应用的css分离处理上。依赖[html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin)把asset chunks输出在html上。
+A webpack Plugin. Extract asset chunks, usually used in css separation processing for single-page applications. Output asset chunks on html via [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin).
 
-搭配[babel-plugin-asyncmodule-import](https://github.com/caoren/react-asyncmodule/tree/master/packages/asyncmodule-import/)的importcss。
+[react-asyncmodule-tool](https://github.com/caoren/react-asyncmodule/tree/master/packages/react-asyncmodule-tool/)'s importcss relay on the plugin.
 
 
-## 使用
+## Installation
 
 ```javascript
 npm install html-webpack-plugin  --save-dev
@@ -26,9 +26,11 @@ module.exports = {
     ]
 };
 ```
-最后页面上生成如下代码
+html inline code like this
+
 ```javascript
-<script type="text/javascript">window.__ASSETS_CHUNKS__ = {
+<script type="text/javascript">
+window.__ASSETS_CHUNKS__ = {
     "app":"/dist/app.49a9342d.css"
 }
 </script>
@@ -38,14 +40,16 @@ module.exports = {
 
 ### name
 
-默认'webpackInlineAssetsChunks'，挂载在`html-webpack-plugin`插件的`htmlWebpackPlugin.files`对象上，html模板中可使用`{{{htmlWebpackPlugin.files.webpackInlineAssetsChunks}}}`获取上面案例的脚本块，webpack v4- 使用
+default 'webpackInlineAssetsChunks'. 
+
+Mounted on the `htmlWebpackPlugin.files` object, the corresponding script block can be generated in the html template using `{{{htmlWebpackPlugin.files.webpackInlineAssetsChunks}}}}`.
+
+Used in webpack v4-.
 
 ### inject
 
-'head | body'，生成的`script`块放置位置。webpack v4 使用
+'head | body'. The location of the generated `script` block, Used in webpack v4.
 
 ### output
 
-输出资源asset chunks的目录文件，如`path.resolve(__dirname, './build/assets.json')`。
-通常给`production`的node端使用，不需要依赖开发环境的构建。
-
+Directory filename for `assetchunks`. Such as`path.resolve(__dirname, './build/assets.json')`.The generated files are used in the `production` server side.

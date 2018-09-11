@@ -2,11 +2,11 @@
   "name": "babel-plugin-asyncmodule-import",
   "version": "0.1.4",
   "description": "",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "BABEL_ENV=commonjs babel-node demo/run.js --require babel-core/register",
     "test": "BABEL_ENV=commonjs mocha test/index.js --require babel-core/register",
-    "js:commonjs": "BABEL_ENV=commonjs babel src/ --out-dir lib/",
+    "js:commonjs": "BABEL_ENV=commonjs babel src/ --out-dir dist/",
     "js:es": "BABEL_ENV=es babel src --out-dir es",
     "build": "npm run js:commonjs && npm run js:es && npm run test"
   },
@@ -28,5 +28,8 @@
     "babel-register": "^6.26.0",
     "chai": "^4.1.2",
     "mocha": "^5.2.0"
+  },
+  "dependencies": {
+    "react-asyncmodule-tool": "^0.1.0"
   }
 }

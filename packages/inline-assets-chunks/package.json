@@ -29,6 +29,9 @@
     "cross-env": "^5.0.5",
     "jest": "^23.5.0"
   },
+  "dependencies": {
+    "react-asyncmodule-tool": "^0.1.0"
+  },
   "scripts": {
     "build:js": "cross-env BABEL_ENV=commonjs babel src/ --out-dir dist/",
     "test": "jest",
