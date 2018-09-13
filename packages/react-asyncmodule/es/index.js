@@ -64,6 +64,10 @@ var Dueimport = function Dueimport() {
         return load();
     };
 
+    var _resolving = resolving(load, resolveWeak),
+        loaded = _resolving.loaded,
+        cur = _resolving.cur;
+
     var AsyncComponent = function (_Component) {
         _inherits(AsyncComponent, _Component);
 
@@ -73,11 +77,6 @@ var Dueimport = function Dueimport() {
             var _this = _possibleConstructorReturn(this, (AsyncComponent.__proto__ || Object.getPrototypeOf(AsyncComponent)).call(this, props));
 
             _this.unmount = false;
-
-            var _resolving = resolving(load, resolveWeak),
-                loaded = _resolving.loaded,
-                cur = _resolving.cur;
-
             _this.state = {
                 needDelay: isDelay,
                 err: '',
@@ -205,6 +204,9 @@ var Dueimport = function Dueimport() {
 
     AsyncComponent.chunk = chunk;
     AsyncComponent.preload = preload;
+    if (loaded) {
+        AsyncComponent.load = cur;
+    }
     return AsyncComponent;
 };
 var Asyncimport = function Asyncimport() {
