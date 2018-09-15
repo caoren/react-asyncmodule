@@ -5,10 +5,23 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "BABEL_ENV=commonjs babel-node demo/run.js --require babel-core/register",
-    "test": "BABEL_ENV=commonjs mocha test/index.js --require babel-core/register",
     "js:commonjs": "BABEL_ENV=commonjs babel src/ --out-dir dist/",
     "js:es": "BABEL_ENV=es babel src --out-dir es",
+    "test": "jest",
     "build": "npm run js:commonjs && npm run js:es && npm run test"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "moduleFileExtensions": [
+      "js",
+      "json"
+    ],
+    "testMatch": [
+      "<rootDir>/test/*.js"
+    ],
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    }
   },
   "repository": {
     "type": "git",
@@ -19,17 +32,18 @@
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
+    "babel-core": "^6.26.0",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
-    "chai": "^4.1.2",
+    "react-asyncmodule-tool": "^0.1.0",
+    "jest": "^23.5.0",
     "mocha": "^5.2.0"
   },
   "dependencies": {
-    "react-asyncmodule-tool": "^0.1.0"
+    "babel-jest": "^23.6.0"
   }
 }

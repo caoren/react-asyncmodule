@@ -35,8 +35,8 @@ export default function (_ref) {
         return t.objectProperty(t.identifier('resolveWeak'), t.arrowFunctionExpression([], t.callExpression(t.memberExpression(t.identifier('require'), t.identifier('resolveWeak')), [t.stringLiteral(modulePath)])));
     };
 
-    var buildChunkName = function buildChunkName(moduleName) {
-        return t.objectProperty(t.identifier('chunk'), t.arrowFunctionExpression([], t.stringLiteral(moduleName)));
+    var buildChunkName = function buildChunkName(chunkNameCmt) {
+        return t.objectProperty(t.identifier('chunk'), t.arrowFunctionExpression([], t.stringLiteral(chunkNameCmt.value.split('"')[1])));
     };
 
     return {
@@ -70,7 +70,10 @@ export default function (_ref) {
 
                     var load = buildLoad(importPath, moduleName, importCss);
                     var resolveWeak = buildResolveWeak(modulePath);
-                    var chunk = buildChunkName(moduleName);
+                    var chunkNameCmt = module.leadingComments.find(function (cmt) {
+                        return cmt.value.includes('webpackChunkName');
+                    });
+                    var chunk = buildChunkName(chunkNameCmt);
 
                     importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
                 }
