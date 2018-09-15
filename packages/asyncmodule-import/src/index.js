@@ -59,12 +59,12 @@ export default function(_ref) {
         )
     );
 
-    const buildChunkName = (moduleName) => (
+    const buildChunkName = (chunkNameCmt) => (
         t.objectProperty(
             t.identifier('chunk'),
             t.arrowFunctionExpression(
                 [],
-                t.stringLiteral(moduleName),
+                t.stringLiteral(chunkNameCmt.value.split('"')[1]),
             )
         )
     )
@@ -104,7 +104,8 @@ export default function(_ref) {
 
                     const load = buildLoad(importPath, moduleName, importCss);
                     const resolveWeak = buildResolveWeak(modulePath);
-                    const chunk = buildChunkName(moduleName);
+                    const chunkNameCmt = module.leadingComments.find(cmt=>(cmt.value.includes('webpackChunkName')));
+                    const chunk = buildChunkName(chunkNameCmt);
 
                     importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
                 }
