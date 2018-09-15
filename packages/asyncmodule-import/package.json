@@ -5,10 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "BABEL_ENV=commonjs babel-node demo/run.js --require babel-core/register",
-    "test": "BABEL_ENV=commonjs mocha test/index.js --require babel-core/register",
-    "js:commonjs": "BABEL_ENV=commonjs babel src/ --out-dir dist/",
+    "js:commonjs": "BABEL_ENV=commonjs babel src/ --out-dir lib/",
     "js:es": "BABEL_ENV=es babel src --out-dir es",
-    "build": "npm run js:commonjs && npm run js:es && npm run test"
+    "build": "npm run js:commonjs && npm run js:es && npm run test",
+    "test": "jest test/test.js"
   },
   "repository": {
     "type": "git",
@@ -26,7 +26,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
-    "chai": "^4.1.2",
+    "jest": "^23.5.0",
     "mocha": "^5.2.0"
   },
   "dependencies": {
