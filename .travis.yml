@@ -13,3 +13,5 @@ cache:
   - packages/react-asyncmodule-tool/node_modules
 before_script:
   - lerna bootstrap
+after_success:
+  - cat ./packages/react-asyncmodule/coverage/lcov.info | ./node_modules/.bin/coveralls

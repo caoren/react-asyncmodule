@@ -1,8 +1,9 @@
 {
   "name": "react-asyncmodule-tool",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "react asyncmodule tool",
   "author": "caoren",
+  "sideEffects": false,
   "keywords": [
     "react",
     "asyncmodule",

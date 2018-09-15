@@ -157,7 +157,7 @@ const Dueimport = (option = {}) => {
     AsyncComponent.chunk = chunk;
     AsyncComponent.preload = preload;
     if (loaded) {
-        AsyncComponent.load = cur;
+        AsyncComponent.comp = cur;
     }
     return AsyncComponent;
 };

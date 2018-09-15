@@ -14,6 +14,7 @@ Es6 used.
 import {
     createAssets,
     exportAssets,
+    getChunksByMatch,
     ImportCss
 } from 'react-asyncmodule-tool';
 ```
@@ -55,6 +56,35 @@ const resource = exportAssets({
 {
     js: '<script type="text/javascript" src="/public/a.js"></script>',
     css: '<link type="text/css" href="/public/a.css" rel="stylesheet">'
+}
+```
+
+### getChunksByMatch(matchRoutes)
+
+Output corresponding `chunkNames` and `comps` according to `matchRoutes`.
+
+```javascript
+const resource = getChunksByMatch([
+{
+    route: {
+        path: '/list',
+        exact: true,
+        component: {
+            chunk: () => 'list',
+            comp: {}
+        }
+    },
+    match: {
+        path: '/list',
+        url: '/list',
+        isExact: true,
+        params: {}
+    }
+}]);
+// output
+{
+    chunkNames: ['list'],
+    comps: [{}]
 }
 ```
 
