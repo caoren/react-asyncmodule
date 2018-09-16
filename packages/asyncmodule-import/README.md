@@ -3,11 +3,9 @@
 > A Babel Plugin，for [react-asyncmodule](https://github.com/caoren/react-asyncmodule.git), can be used for tranfroming async module importing.
 
 
-## install
-> npm i babel-plugin-asyncmodule-import
+## Installation
 
-## version
-> 0.1.2
+> npm i babel-plugin-asyncmodule-import
 
 ## used in webpack babel-loader
 
@@ -31,11 +29,11 @@
 
 Name             | Type       | Default          | Description
 -----------------|------------|------------------|--------------
-[importCss]       | `Boolean`   |  `false`  | 是否调用ImportCss加载css
+[importCss]       | `Boolean`   |  `false`  | import `ImportCss` to load css
 
-## function
-该插件用于以下转换
+## What it does
 
+If you're using dynamic imports by `react-asyncmodule`
 
 ```javascript
 // when importCss set true
@@ -49,7 +47,7 @@ const Home = AsyncComponent(import('./views/home'));
  ↓ ↓ ↓ ↓ ↓ ↓  
 
 import AsyncModule from 'react-asyncmodule';
-import ImportCss from 'babel-plugin-asyncmodule-import/lib/importcss';
+import ImportCss from 'react-asyncmodule-tool/dist/importcss';
 const AsyncComponent = AsyncModule({
     delay: 300,
     ...
@@ -81,3 +79,6 @@ const Home = AsyncComponent({
     resolveWeak: () => require.resolveWeak('./views/home')
 });
 ```
+
+
+> Css split can be implemented by [extract-css-chunks-webpack-plugin](https://github.com/faceyspacey/extract-css-chunks-webpack-plugin)

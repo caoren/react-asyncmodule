@@ -36,7 +36,8 @@ const Dueimport = (option = {}) => {
         error,
         delay,
         timeout,
-        resolveWeak
+        resolveWeak,
+        chunk
     } = option;
     if (!load) {
         return null;
@@ -48,11 +49,11 @@ const Dueimport = (option = {}) => {
     const isDelay = typeof delay === 'number' && delay !== 0;
     const isTimeout = typeof timeout === 'number' && timeout !== 0;
     const preload = () => load();
+    const { loaded, cur } = resolving(load, resolveWeak);
     class AsyncComponent extends Component {
         constructor(props) {
             super(props);
             this.unmount = false;
-            const { loaded, cur } = resolving(load, resolveWeak);
             this.state = {
                 needDelay: isDelay,
                 err: '',
@@ -153,7 +154,11 @@ const Dueimport = (option = {}) => {
             return <LoadComponent {...this.props} />;
         }
     }
+    AsyncComponent.chunk = chunk;
     AsyncComponent.preload = preload;
+    if (loaded) {
+        AsyncComponent.comp = cur;
+    }
     return AsyncComponent;
 };
 const Asyncimport = (initOptions = {}, dueOptions = {}) => {

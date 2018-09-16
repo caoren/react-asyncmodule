@@ -1,7 +1,7 @@
 test/
-demo/
 src/
 coverage/
 .babelrc
+.eslintrc.js
 .gitignore
 .npmignore

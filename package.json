@@ -3,6 +3,11 @@
   "name": "react-asyncmodule-packages",
   "version": "0.1.0",
   "devDependencies": {
+    "coveralls": "^3.0.2",
     "lerna": "^2.11.0"
+  },
+  "scripts": {
+    "test": "lerna run test",
+    "build": "lerna run build"
   }
 }

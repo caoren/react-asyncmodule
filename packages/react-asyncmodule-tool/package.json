@@ -1,12 +1,13 @@
 {
-  "name": "inline-assets-webpack-plugin",
-  "version": "0.1.0",
-  "description": "split assets by webpack stats",
+  "name": "react-asyncmodule-tool",
+  "version": "0.1.1",
+  "description": "react asyncmodule tool",
   "author": "caoren",
+  "sideEffects": false,
   "keywords": [
-    "assets",
-    "webpack",
-    "plugin"
+    "react",
+    "asyncmodule",
+    "tool"
   ],
   "bugs": {
     "url": "https://github.com/caoren/react-asyncmodule/issues"
@@ -16,7 +17,12 @@
     "type": "git",
     "url": "https://github.com/caoren/react-asyncmodule.git"
   },
-  "main": "dist/index.js",
+  "scripts": {
+    "js:commonjs": "cross-env BABEL_ENV=commonjs babel src/ --out-dir dist/",
+    "js:es": "cross-env BABEL_ENV=es babel src --out-dir es",
+    "test": "jest",
+    "build": "npm run test && npm run js:commonjs && npm run js:es"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
@@ -29,19 +35,16 @@
     "cross-env": "^5.0.5",
     "jest": "^23.5.0"
   },
-  "dependencies": {
-    "react-asyncmodule-tool": "^0.1.0"
+  "engines": {
+    "node": ">= 6.2.0",
+    "npm": ">= 3.0.0"
   },
-  "scripts": {
-    "build:js": "cross-env BABEL_ENV=commonjs babel src/ --out-dir dist/",
-    "test": "jest",
-    "build": "npm test && npm run build:js"
-  },
+  "jsnext:main": "es/index.js",
+  "main": "dist/index.js",
   "jest": {
     "collectCoverage": true,
     "moduleFileExtensions": [
-      "js",
-      "jsx"
+      "js"
     ],
     "testMatch": [
       "<rootDir>/test/*.js?(x)"

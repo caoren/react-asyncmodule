@@ -1,15 +1,14 @@
+// copy https://github.com/faceyspacey/babel-plugin-dual-import
 var LOADED = {};
 var getResource = function getResource(rsName) {
-    if (typeof window === 'undefined' || !window.ASSETS_CHUNKS) {
+    if (typeof window === 'undefined' || !window.__ASSETS_CHUNKS__) {
         return null;
     }
-    var CSSChunks = window.ASSETS_CHUNKS;
-    return CSSChunks.css[rsName];
+    var CSSChunks = window.__ASSETS_CHUNKS__;
+    return CSSChunks[rsName];
 };
 var ImportCss = function ImportCss(rsName) {
     var href = getResource(rsName);
-    // 不存在、已加载、在node环境
-    // 返回一个resolve的Promise
     if (!href || LOADED[href] === true || typeof window === 'undefined') {
         return Promise.resolve();
     }
@@ -31,8 +30,6 @@ var ImportCss = function ImportCss(rsName) {
             reject(new Error(message));
             delete LOADED[href];
         };
-        // link.onload doesn't work well enough, but this will handle it
-        // since images can't load css (this is a popular fix)
         var img = document.createElement('img');
         img.onerror = function () {
             link.onerror = null;

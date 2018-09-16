@@ -1,0 +1,13 @@
+sudo: false
+language: node_js
+node_js:
+  - "6"
+  - "8"
+  - "9"
+  - "10"
+install:
+  - npm install
+before_script:
+  - lerna bootstrap
+after_success:
+  - cat ./packages/react-asyncmodule/coverage/lcov.info | ./node_modules/.bin/coveralls

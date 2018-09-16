@@ -1,6 +1,7 @@
 demo/
 test/
 src/
+coverage/
 .babelrc
 .eslintrc.js
 .gitignore
