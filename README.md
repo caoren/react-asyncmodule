@@ -6,6 +6,8 @@ Asynchronous Loading `React` component.
     <a href="https://www.npmjs.com/package/react-asyncmodule"><img src="https://img.shields.io/npm/v/react-asyncmodule.svg?style=flat"></a>
     <a href="https://www.npmjs.com/package/react-asyncmodule"><img src="https://img.shields.io/npm/dm/react-asyncmodule.svg?style=flat"></a>
     <a href="https://travis-ci.org/caoren/react-asyncmodule"><img src="https://img.shields.io/travis/caoren/react-asyncmodule/master.svg?style=flat"></a>
+    <a href='https://coveralls.io/github/caoren/react-asyncmodule?branch=master'><img src='https://coveralls.io/repos/github/caoren/react-asyncmodule/badge.svg?branch=master' alt='Coverage Status' /></a>
+
 </p>
 
 ## Packages

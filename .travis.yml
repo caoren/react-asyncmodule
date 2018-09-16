@@ -5,12 +5,8 @@ node_js:
   - "8"
   - "9"
   - "10"
-cache:
-  directories:
-  - packages/asyncmodule-import/node_modules
-  - packages/inline-assets-chunks/node_modules
-  - packages/react-asyncmodule/node_modules
-  - packages/react-asyncmodule-tool/node_modules
+install:
+  - npm install
 before_script:
   - lerna bootstrap
 after_success:
