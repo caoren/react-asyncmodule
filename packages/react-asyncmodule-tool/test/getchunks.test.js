@@ -3,21 +3,16 @@ import { getChunksByMatch } from '../src/index';
 describe('getChunksByMatch', () => {
     test('default', () => {
         const res = getChunksByMatch();
-        expect(res).toEqual({
-            chunkNames: [],
-            comps: []
-        });
+        expect(res).toEqual([]);
     });
     test('custom', () => {
-        const listComp = {};
         const assets = [
             {
                 route: {
                     path: '/list',
                     exact: true,
                     component: {
-                        chunk: () => 'list',
-                        comp: listComp
+                        chunk: () => 'list'
                     }
                 },
                 match: {
@@ -41,9 +36,6 @@ describe('getChunksByMatch', () => {
                 }
             }
         ];
-        expect(getChunksByMatch(assets)).toEqual({
-            chunkNames: ['list'],
-            comps: [listComp]
-        });
+        expect(getChunksByMatch(assets)).toEqual(['list']);
     });
 });
