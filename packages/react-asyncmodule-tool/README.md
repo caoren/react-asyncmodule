@@ -15,6 +15,7 @@ import {
     createAssets,
     exportAssets,
     getChunksByMatch,
+    getCompsByMatch,
     ImportCss
 } from 'react-asyncmodule-tool';
 ```
@@ -61,17 +62,15 @@ const resource = exportAssets({
 
 ### getChunksByMatch(matchRoutes)
 
-Output corresponding `chunkNames` and `comps` according to `matchRoutes`.
+Output `chunkNames` according to [matchRoutes](https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config#matchroutesroutes-pathname).
 
 ```javascript
-const resource = getChunksByMatch([
-{
+getChunksByMatch([{
     route: {
         path: '/list',
         exact: true,
         component: {
             chunk: () => 'list',
-            comp: {}
         }
     },
     match: {
@@ -80,12 +79,33 @@ const resource = getChunksByMatch([
         isExact: true,
         params: {}
     }
-}]);
-// output
-{
-    chunkNames: ['list'],
-    comps: [{}]
-}
+}]); // ['list']
+```
+
+### getCompsByMatch(matchRoutes)
+
+Output `chunkNames` according to [matchRoutes](https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config#matchroutesroutes-pathname).
+
+```javascript
+const promises = getChunksByMatch([{
+    route: {
+        path: '/list',
+        exact: true,
+        component: {
+            chunk: () => 'list',
+            preload: () => Promise.resolve(1)
+        }
+    },
+    match: {
+        path: '/list',
+        url: '/list',
+        isExact: true,
+        params: {}
+    }
+}]);  // A Promise instance
+promises.then((comps) => {
+    // [1]
+});
 ```
 
 ### ImportCss(chunkName)
