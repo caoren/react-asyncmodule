@@ -12,6 +12,25 @@ const rand_Component = rand_AsyncModule({
 });
 
 export const A = AsyncImport({
-    load: ()=>import('./a')
+    load: () => {
+        import('./a');
+    },
+    loading: 'LoadingView',
+    error: 'ErrorView',
 });
+
+export const B = AsyncImport({
+    load: () => import('./a'),
+    loading: 'LoadingView',
+    error: 'ErrorView',
+});
+
+export const C = AsyncImport({
+    load() {
+        import('./a');
+    },
+    loading: 'LoadingView',
+    error: 'ErrorView',
+});
+
 const Homex = rand_Component(import(/*webpackChunkName: "arandomname"*/'./views/homex'));

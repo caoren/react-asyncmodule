@@ -8,8 +8,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 exports.default = function (_ref) {
     var t = _ref.types;
-    var asyncModule = 'asyncModule',
-        asyncComponent = 'asyncComponent';
 
     var addComments = function addComments(module) {
         var modulePath = module.value;
@@ -26,9 +24,7 @@ exports.default = function (_ref) {
         };
     };
 
-    var buildLoad = function buildLoad(importPath, moduleName) {
-        var importCss = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
+    var buildLoad = function buildLoad(importPath, moduleName, importCss) {
         var loadMaterials = [importPath.node];
 
         if (importCss) {
@@ -54,14 +50,16 @@ exports.default = function (_ref) {
         if (importCss) {
             var declaration = t.importDeclaration([t.importDefaultSpecifier(t.identifier('ImportCss'))], t.stringLiteral('react-asyncmodule-tool/dist/importcss'));
             var programPath = getProgramPath(path);
-            var fstLn = programPath.node.body[0];
-            var existedImportCss = t.isImportDeclaration(fstLn) && fstLn.specifiers.length && fstLn.specifiers[0].local.name === fstLn.specifiers[0].local.name === 'ImportCss';
-            if (!existedImportCss) {
+            if (!programPath.scope.existedImportCss) {
                 programPath.unshiftContainer('body', declaration);
+                programPath.scope.existedImportCss = true;
             }
         }
     };
+
     var astParser = function astParser(path, importCss) {
+        var returnImport = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
+
         handleImportCss(path, importCss);
         // add leadingComments to the import argument module
         var nodeType = path.node.type;
@@ -71,8 +69,11 @@ exports.default = function (_ref) {
         if (nodeType === 'CallExpression') {
             importPath = path.get('arguments.0');
         }
-        if (nodeType === 'ArrowFunctionExpression') {
-            importPath = path.get('body');
+        if (nodeType === 'ObjectProperty') {
+            importPath = returnImport ? path.get('value.body') : path.get('value.body.body.0.expression');
+        }
+        if (nodeType === 'ObjectMethod') {
+            importPath = path.get('body.body.0.expression');
         }
 
         var _importPath$node$argu = _slicedToArray(importPath.node.arguments, 1);
@@ -89,32 +90,67 @@ exports.default = function (_ref) {
             return cmt.value.includes('webpackChunkName');
         });
         var chunk = buildChunkName(chunkNameCmt);
-
-        importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
+        if (nodeType === 'CallExpression') {
+            importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
+        }
+        if (nodeType === 'ObjectProperty') {
+            var more = path.parent.properties.splice(1);
+            var nmore = more.map(function (property, index) {
+                return t.objectProperty(property.key, property.value);
+            });
+            path.replaceWithMultiple([load, resolveWeak, chunk].concat(nmore));
+        }
+        if (nodeType === 'ObjectMethod') {
+            var _more = path.parent.properties.splice(1);
+            var _nmore = _more.map(function (property, index) {
+                return t.objectProperty(property.key, property.value);
+            });
+            path.replaceWithMultiple([load, resolveWeak, chunk].concat(_nmore));
+        }
     };
     return {
         visitor: {
-            CallExpression: function CallExpression(path, _ref2) {
-                var _ref2$opts = _ref2.opts,
-                    opts = _ref2$opts === undefined ? {} : _ref2$opts;
+            ImportDeclaration: function ImportDeclaration(path) {
                 var node = path.node;
-                var importCss = opts.importCss;
 
-                if (!node) return;
+                var programPath = getProgramPath(path);
+                if (node.specifiers.length && node.specifiers[0].local.name === 'ImportCss') {
+                    programPath.scope.existedImportCss = true;
+                }
+            },
+            CallExpression: function CallExpression(path, _ref2) {
+                var opts = _ref2.opts;
+                var node = path.node;
+
+                var importCss = opts && opts.importCss || false;
 
                 if (t.isCallExpression(node.arguments[0]) && t.isImport(node.arguments[0].callee)) {
                     astParser(path, importCss);
                 }
             },
-            ArrowFunctionExpression: function ArrowFunctionExpression(path, _ref3) {
-                var _ref3$opts = _ref3.opts,
-                    opts = _ref3$opts === undefined ? {} : _ref3$opts;
+            ObjectProperty: function ObjectProperty(path, _ref3) {
+                var opts = _ref3.opts;
                 var node = path.node;
-                var importCss = opts.importCss;
 
-                if (!node) return;
+                var importCss = opts && opts.importCss || false;
+                var returnImport = undefined;
+                if (node.key.name === 'load' && t.isArrowFunctionExpression(node.value)) {
+                    if (node.value.body && t.isImport(node.value.body.callee)) {
+                        returnImport = true;
+                    } else if (node.value.body.body && t.isImport(node.value.body.body[0].expression.callee)) {
+                        returnImport = false;
+                    }
+                    if (returnImport !== undefined) {
+                        astParser(path, importCss, returnImport);
+                    }
+                }
+            },
+            ObjectMethod: function ObjectMethod(path, _ref4) {
+                var opts = _ref4.opts;
+                var node = path.node;
 
-                if (t.isCallExpression(node.body) && t.isImport(node.body.callee)) {
+                var importCss = opts && opts.importCss || false;
+                if (node.key.name === 'load' && node.body.body && t.isImport(node.body.body[0].expression.callee)) {
                     astParser(path, importCss);
                 }
             }

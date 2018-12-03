@@ -3,3 +3,10 @@ export const A = AsyncImport({
     loading: 'LoadingView',
     error: 'ErrorView'
 });
+export const B = AsyncImport({
+    load: ()=> {
+        import('./b')
+    },
+    loading: 'LoadingView',
+    error: 'ErrorView'
+});
