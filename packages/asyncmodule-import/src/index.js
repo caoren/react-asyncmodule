@@ -68,46 +68,66 @@ export default function(_ref) {
             )
         )
     )
+    const getProgramPath = path => path.find((p) => t.isProgram(p.node));
 
+    const handleImportCss = (path, importCss) => {
+        if (importCss) {
+            const declaration = t.importDeclaration(
+                [t.importDefaultSpecifier(t.identifier('ImportCss'))],
+                t.stringLiteral('react-asyncmodule-tool/dist/importcss')
+            );
+            const programPath = getProgramPath(path)
+            const fstLn = programPath.node.body[0];
+
+            if (!(t.isImportDeclaration(fstLn) && fstLn.specifiers[0].local.name === 'ImportCss' && (fstLn.source.value === 'react-asyncmodule-tool/dist/importcss'))) {
+                programPath.unshiftContainer('body', declaration);
+            }
+        }
+    }
+    const astParser = (path, importCss) => {
+        handleImportCss(path, importCss);
+        // add leadingComments to the import argument module
+        const {type: nodeType} = path.node;
+        let importPath = '';
+        let module='';
+        if (nodeType === 'CallExpression') {
+            importPath = path.get('arguments.0');
+        }
+        if (nodeType === 'ArrowFunctionExpression') {
+            importPath = path.get('body');
+        }
+        [module] = importPath.node.arguments;
+        const { modulePath, moduleName } = addComments(module);
+
+        const load = buildLoad(importPath, moduleName, importCss);
+        const resolveWeak = buildResolveWeak(modulePath);
+        const chunkNameCmt = module.leadingComments.find(cmt=>(cmt.value.includes('webpackChunkName')));
+        const chunk = buildChunkName(chunkNameCmt);
+
+        importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
+    }
     return {
         visitor: {
             CallExpression(path, {
                 opts = {}
             }) {
-                const {
-                    node
-                } = path;
-                const {
-                    importCss
-                } = opts;
-                if (!node) {
-                    return;
-                }
+                const { node } = path;
+                const { importCss } = opts;
+                if (!node) return;
+
                 if (t.isCallExpression(node.arguments[0]) && t.isImport(node.arguments[0].callee)) {
-                    if (importCss) {
-                        const declaration = t.importDeclaration(
-                            [t.importDefaultSpecifier(t.identifier('ImportCss'))],
-                            t.stringLiteral('react-asyncmodule-tool/dist/importcss')
-                        );
-                        const programPath = path.find((p) => {
-                            return t.isProgram(p.node);
-                        });
-                        programPath.unshiftContainer('body', declaration);
-                    }
-                    // add leadingComments to the import argument module
-                    const importPath = path.get('arguments.0');
-                    const [module] = importPath.node.arguments;
-                    const {
-                        modulePath,
-                        moduleName
-                    } = addComments(module);
+                    astParser(path, importCss);
+                }
+            },
+            ArrowFunctionExpression(path, {
+                opts={}
+            }) {
+                const { node } = path;
+                const { importCss } = opts;
+                if (!node) return;
 
-                    const load = buildLoad(importPath, moduleName, importCss);
-                    const resolveWeak = buildResolveWeak(modulePath);
-                    const chunkNameCmt = module.leadingComments.find(cmt=>(cmt.value.includes('webpackChunkName')));
-                    const chunk = buildChunkName(chunkNameCmt);
-
-                    importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
+                if (t.isCallExpression(node.body) && t.isImport(node.body.callee)) {
+                    astParser(path, importCss);
                 }
             }
         }
