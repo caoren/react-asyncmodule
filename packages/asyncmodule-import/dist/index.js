@@ -55,8 +55,8 @@ exports.default = function (_ref) {
             var declaration = t.importDeclaration([t.importDefaultSpecifier(t.identifier('ImportCss'))], t.stringLiteral('react-asyncmodule-tool/dist/importcss'));
             var programPath = getProgramPath(path);
             var fstLn = programPath.node.body[0];
-
-            if (!(t.isImportDeclaration(fstLn) && fstLn.specifiers[0].local.name === 'ImportCss' && fstLn.source.value === 'react-asyncmodule-tool/dist/importcss')) {
+            var existedImportCss = t.isImportDeclaration(fstLn) && fstLn.specifiers.length && fstLn.specifiers[0].local.name === fstLn.specifiers[0].local.name === 'ImportCss';
+            if (!existedImportCss) {
                 programPath.unshiftContainer('body', declaration);
             }
         }

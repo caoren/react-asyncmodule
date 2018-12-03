@@ -1,4 +1,5 @@
 import AsyncModule from 'react-asyncmodule'; 
+import 'react-asyncmodule'; 
 const AsyncComponent = AsyncModule({
     delay: 300
 });

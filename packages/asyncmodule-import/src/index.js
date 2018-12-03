@@ -78,8 +78,8 @@ export default function(_ref) {
             );
             const programPath = getProgramPath(path)
             const fstLn = programPath.node.body[0];
-
-            if (!(t.isImportDeclaration(fstLn) && fstLn.specifiers[0].local.name === 'ImportCss' && (fstLn.source.value === 'react-asyncmodule-tool/dist/importcss'))) {
+            const existedImportCss = t.isImportDeclaration(fstLn) && fstLn.specifiers.length && fstLn.specifiers[0].local.name === fstLn.specifiers[0].local.name === 'ImportCss'
+            if (!existedImportCss) {
                 programPath.unshiftContainer('body', declaration);
             }
         }
