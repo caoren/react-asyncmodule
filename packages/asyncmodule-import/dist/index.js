@@ -44,7 +44,54 @@ exports.default = function (_ref) {
     var buildChunkName = function buildChunkName(chunkNameCmt) {
         return t.objectProperty(t.identifier('chunk'), t.arrowFunctionExpression([], t.stringLiteral(chunkNameCmt.value.split('"')[1])));
     };
+    var getProgramPath = function getProgramPath(path) {
+        return path.find(function (p) {
+            return t.isProgram(p.node);
+        });
+    };
 
+    var handleImportCss = function handleImportCss(path, importCss) {
+        if (importCss) {
+            var declaration = t.importDeclaration([t.importDefaultSpecifier(t.identifier('ImportCss'))], t.stringLiteral('react-asyncmodule-tool/dist/importcss'));
+            var programPath = getProgramPath(path);
+            var fstLn = programPath.node.body[0];
+
+            if (!(t.isImportDeclaration(fstLn) && fstLn.specifiers[0].local.name === 'ImportCss' && fstLn.source.value === 'react-asyncmodule-tool/dist/importcss')) {
+                programPath.unshiftContainer('body', declaration);
+            }
+        }
+    };
+    var astParser = function astParser(path, importCss) {
+        handleImportCss(path, importCss);
+        // add leadingComments to the import argument module
+        var nodeType = path.node.type;
+
+        var importPath = '';
+        var module = '';
+        if (nodeType === 'CallExpression') {
+            importPath = path.get('arguments.0');
+        }
+        if (nodeType === 'ArrowFunctionExpression') {
+            importPath = path.get('body');
+        }
+
+        var _importPath$node$argu = _slicedToArray(importPath.node.arguments, 1);
+
+        module = _importPath$node$argu[0];
+
+        var _addComments = addComments(module),
+            modulePath = _addComments.modulePath,
+            moduleName = _addComments.moduleName;
+
+        var load = buildLoad(importPath, moduleName, importCss);
+        var resolveWeak = buildResolveWeak(modulePath);
+        var chunkNameCmt = module.leadingComments.find(function (cmt) {
+            return cmt.value.includes('webpackChunkName');
+        });
+        var chunk = buildChunkName(chunkNameCmt);
+
+        importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
+    };
     return {
         visitor: {
             CallExpression: function CallExpression(path, _ref2) {
@@ -53,35 +100,22 @@ exports.default = function (_ref) {
                 var node = path.node;
                 var importCss = opts.importCss;
 
-                if (!node) {
-                    return;
-                }
+                if (!node) return;
+
                 if (t.isCallExpression(node.arguments[0]) && t.isImport(node.arguments[0].callee)) {
-                    if (importCss) {
-                        var declaration = t.importDeclaration([t.importDefaultSpecifier(t.identifier('ImportCss'))], t.stringLiteral('react-asyncmodule-tool/dist/importcss'));
-                        var programPath = path.find(function (p) {
-                            return t.isProgram(p.node);
-                        });
-                        programPath.unshiftContainer('body', declaration);
-                    }
-                    // add leadingComments to the import argument module
-                    var importPath = path.get('arguments.0');
+                    astParser(path, importCss);
+                }
+            },
+            ArrowFunctionExpression: function ArrowFunctionExpression(path, _ref3) {
+                var _ref3$opts = _ref3.opts,
+                    opts = _ref3$opts === undefined ? {} : _ref3$opts;
+                var node = path.node;
+                var importCss = opts.importCss;
 
-                    var _importPath$node$argu = _slicedToArray(importPath.node.arguments, 1),
-                        module = _importPath$node$argu[0];
+                if (!node) return;
 
-                    var _addComments = addComments(module),
-                        modulePath = _addComments.modulePath,
-                        moduleName = _addComments.moduleName;
-
-                    var load = buildLoad(importPath, moduleName, importCss);
-                    var resolveWeak = buildResolveWeak(modulePath);
-                    var chunkNameCmt = module.leadingComments.find(function (cmt) {
-                        return cmt.value.includes('webpackChunkName');
-                    });
-                    var chunk = buildChunkName(chunkNameCmt);
-
-                    importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
+                if (t.isCallExpression(node.body) && t.isImport(node.body.callee)) {
+                    astParser(path, importCss);
                 }
             }
         }
