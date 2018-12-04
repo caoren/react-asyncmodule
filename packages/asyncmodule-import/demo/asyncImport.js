@@ -11,14 +11,6 @@ const rand_Component = rand_AsyncModule({
     delay: 300
 });
 
-export const A = AsyncImport({
-    load: () => {
-        import('./a');
-    },
-    loading: 'LoadingView',
-    error: 'ErrorView',
-});
-
 export const B = AsyncImport({
     load: () => import('./a'),
     loading: 'LoadingView',
@@ -28,6 +20,14 @@ export const B = AsyncImport({
 export const C = AsyncImport({
     load() {
         import('./a');
+    },
+    loading: 'LoadingView',
+    error: 'ErrorView',
+});
+
+export const D = AsyncImport({
+    load() {
+        return import('./a');
     },
     loading: 'LoadingView',
     error: 'ErrorView',

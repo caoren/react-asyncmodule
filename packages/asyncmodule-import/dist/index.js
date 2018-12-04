@@ -73,7 +73,7 @@ exports.default = function (_ref) {
             importPath = returnImport ? path.get('value.body') : path.get('value.body.body.0.expression');
         }
         if (nodeType === 'ObjectMethod') {
-            importPath = path.get('body.body.0.expression');
+            importPath = returnImport ? path.get('body.body.0.argument') : path.get('body.body.0.expression');
         }
 
         var _importPath$node$argu = _slicedToArray(importPath.node.arguments, 1);
@@ -150,8 +150,18 @@ exports.default = function (_ref) {
                 var node = path.node;
 
                 var importCss = opts && opts.importCss || false;
-                if (node.key.name === 'load' && node.body.body && t.isImport(node.body.body[0].expression.callee)) {
-                    astParser(path, importCss);
+                var returnImport = undefined;
+                if (node.key.name === 'load' && t.isBlockStatement(node.body)) {
+                    if (t.isExpressionStatement(node.body.body[0]) && t.isImport(node.body.body[0].expression.callee)) {
+                        returnImport = false;
+                    } else if (t.isReturnStatement(node.body.body[0]) && t.isImport(node.body.body[0].argument.callee)) {
+                        returnImport = true;
+                    } else {
+                        return;
+                    }
+                    astParser(path, importCss, returnImport);
+                } else {
+                    return;
                 }
             }
         }
