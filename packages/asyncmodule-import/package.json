@@ -1,7 +1,7 @@
 {
   "name": "babel-plugin-asyncmodule-import",
-  "version": "0.1.9",
-  "description": "",
+  "version": "0.2.0",
+  "description": "A babel plugin",
   "main": "dist/index.js",
   "scripts": {
     "dev": "BABEL_ENV=commonjs babel-node demo/run.js --require babel-core/register",

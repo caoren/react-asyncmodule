@@ -1,11 +1,11 @@
 export const A = AsyncImport({
-    load: ()=>import('./a'),
+    load: () => import('./a'),
     loading: 'LoadingView',
     error: 'ErrorView'
 });
 export const B = AsyncImport({
-    load: ()=> {
-        import('./b')
+    load: () => {
+        return import('./b')
     },
     loading: 'LoadingView',
     error: 'ErrorView'

@@ -70,10 +70,10 @@ exports.default = function (_ref) {
             importPath = path.get('arguments.0');
         }
         if (nodeType === 'ObjectProperty') {
-            importPath = returnImport ? path.get('value.body') : path.get('value.body.body.0.expression');
+            importPath = !returnImport ? path.get('value.body') : path.get('value.body.body.0.argument');
         }
         if (nodeType === 'ObjectMethod') {
-            importPath = returnImport ? path.get('body.body.0.argument') : path.get('body.body.0.expression');
+            importPath = path.get('body.body.0.argument');
         }
 
         var _importPath$node$argu = _slicedToArray(importPath.node.arguments, 1);
@@ -135,14 +135,16 @@ exports.default = function (_ref) {
                 var importCss = opts && opts.importCss || false;
                 var returnImport = undefined;
                 if (node.key.name === 'load' && t.isArrowFunctionExpression(node.value)) {
-                    if (node.value.body && t.isImport(node.value.body.callee)) {
-                        returnImport = true;
-                    } else if (node.value.body.body && t.isImport(node.value.body.body[0].expression.callee)) {
+                    if (node.value.body && t.isCallExpression(node.value.body) && t.isImport(node.value.body.callee)) {
                         returnImport = false;
+                    } else if (node.value.body && t.isBlockStatement(node.value.body) && t.isReturnStatement(node.value.body.body[0]) && t.isCallExpression(node.value.body.body[0].argument) && t.isImport(node.value.body.body[0].argument.callee)) {
+                        returnImport = true;
                     }
                     if (returnImport !== undefined) {
                         astParser(path, importCss, returnImport);
                     }
+                } else {
+                    return;
                 }
             },
             ObjectMethod: function ObjectMethod(path, _ref4) {
@@ -150,16 +152,8 @@ exports.default = function (_ref) {
                 var node = path.node;
 
                 var importCss = opts && opts.importCss || false;
-                var returnImport = undefined;
-                if (node.key.name === 'load' && t.isBlockStatement(node.body)) {
-                    if (t.isExpressionStatement(node.body.body[0]) && t.isImport(node.body.body[0].expression.callee)) {
-                        returnImport = false;
-                    } else if (t.isReturnStatement(node.body.body[0]) && t.isImport(node.body.body[0].argument.callee)) {
-                        returnImport = true;
-                    } else {
-                        return;
-                    }
-                    astParser(path, importCss, returnImport);
+                if (node.key.name === 'load' && t.isBlockStatement(node.body) && t.isReturnStatement(node.body.body[0]) && t.isCallExpression(node.body.body[0].argument) && t.isImport(node.body.body[0].argument.callee)) {
+                    astParser(path, importCss);
                 } else {
                     return;
                 }
