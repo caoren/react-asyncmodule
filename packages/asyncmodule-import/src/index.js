@@ -1,7 +1,5 @@
 export default function(_ref) {
     let t = _ref.types;
-    let asyncModule = 'asyncModule',
-        asyncComponent = 'asyncComponent';
 
     const addComments = module => {
         const modulePath = module.value;
@@ -18,7 +16,7 @@ export default function(_ref) {
         };
     };
 
-    const buildLoad = (importPath, moduleName, importCss = false) => {
+    const buildLoad = (importPath, moduleName, importCss) => {
         let loadMaterials = [importPath.node];
 
         if (importCss) {
@@ -76,25 +74,28 @@ export default function(_ref) {
                 [t.importDefaultSpecifier(t.identifier('ImportCss'))],
                 t.stringLiteral('react-asyncmodule-tool/dist/importcss')
             );
-            const programPath = getProgramPath(path)
-            const fstLn = programPath.node.body[0];
-            const existedImportCss = t.isImportDeclaration(fstLn) && fstLn.specifiers.length && fstLn.specifiers[0].local.name === fstLn.specifiers[0].local.name === 'ImportCss'
-            if (!existedImportCss) {
+            const programPath = getProgramPath(path);
+            if (!programPath.scope.existedImportCss) {
                 programPath.unshiftContainer('body', declaration);
+                programPath.scope.existedImportCss = true;
             }
         }
     }
-    const astParser = (path, importCss) => {
+
+    const astParser = (path, importCss, returnImport=undefined) => {
         handleImportCss(path, importCss);
         // add leadingComments to the import argument module
-        const {type: nodeType} = path.node;
+        const { type: nodeType } = path.node;
         let importPath = '';
         let module='';
         if (nodeType === 'CallExpression') {
             importPath = path.get('arguments.0');
         }
-        if (nodeType === 'ArrowFunctionExpression') {
-            importPath = path.get('body');
+        if (nodeType === 'ObjectProperty') {
+            importPath = !returnImport ? path.get('value.body') : path.get('value.body.body.0.argument');
+        }
+        if (nodeType === 'ObjectMethod') {
+            importPath = path.get('body.body.0.argument');
         }
         [module] = importPath.node.arguments;
         const { modulePath, moduleName } = addComments(module);
@@ -103,31 +104,65 @@ export default function(_ref) {
         const resolveWeak = buildResolveWeak(modulePath);
         const chunkNameCmt = module.leadingComments.find(cmt=>(cmt.value.includes('webpackChunkName')));
         const chunk = buildChunkName(chunkNameCmt);
-
-        importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
+        if (nodeType === 'CallExpression') {
+            importPath.replaceWith(t.objectExpression([load, resolveWeak, chunk]));
+        }
+        if (nodeType === 'ObjectProperty') {
+            const more = path.parent.properties.splice(1);
+            const nmore = more.map((property,index)=>{
+                return t.objectProperty(property.key, property.value)
+            });
+            path.replaceWithMultiple([load, resolveWeak, chunk].concat(nmore));
+        }
+        if (nodeType === 'ObjectMethod') {
+            const more = path.parent.properties.splice(1);
+            const nmore = more.map((property,index)=>{
+                return t.objectProperty(property.key, property.value)
+            });
+            path.replaceWithMultiple([load, resolveWeak, chunk].concat(nmore));
+        }
     }
     return {
         visitor: {
-            CallExpression(path, {
-                opts = {}
-            }) {
+            ImportDeclaration(path) {
                 const { node } = path;
-                const { importCss } = opts;
-                if (!node) return;
+                const programPath = getProgramPath(path);
+                if (node.specifiers.length && node.specifiers[0].local.name === 'ImportCss') {
+                    programPath.scope.existedImportCss = true;
+                }
+            },
+            CallExpression(path, { opts }) {
+                const { node } = path;
+                const importCss = opts && opts.importCss || false;
 
                 if (t.isCallExpression(node.arguments[0]) && t.isImport(node.arguments[0].callee)) {
                     astParser(path, importCss);
                 }
             },
-            ArrowFunctionExpression(path, {
-                opts={}
-            }) {
+            ObjectProperty(path, { opts }) {
                 const { node } = path;
-                const { importCss } = opts;
-                if (!node) return;
-
-                if (t.isCallExpression(node.body) && t.isImport(node.body.callee)) {
+                const importCss = opts && opts.importCss || false;
+                let returnImport = undefined;
+                if (node.key.name === 'load' && t.isArrowFunctionExpression(node.value)) {
+                    if (node.value.body && t.isCallExpression(node.value.body) && t.isImport(node.value.body.callee)) {
+                        returnImport = false;
+                    } else if (node.value.body&& t.isBlockStatement(node.value.body) && t.isReturnStatement(node.value.body.body[0]) && t.isCallExpression(node.value.body.body[0].argument) && t.isImport(node.value.body.body[0].argument.callee)) {
+                        returnImport = true;
+                    }
+                    if (returnImport !== undefined) {
+                        astParser(path, importCss, returnImport);
+                    }
+                } else {
+                    return;
+                }
+            },
+            ObjectMethod(path, { opts }) {
+                const { node } = path;
+                const importCss = opts && opts.importCss || false;
+                if (node.key.name === 'load' &&  t.isBlockStatement(node.body) && t.isReturnStatement(node.body.body[0]) && t.isCallExpression(node.body.body[0].argument) && t.isImport(node.body.body[0].argument.callee)) {
                     astParser(path, importCss);
+                } else {
+                    return;
                 }
             }
         }
