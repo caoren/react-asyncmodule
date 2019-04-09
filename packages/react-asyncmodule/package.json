@@ -94,5 +94,8 @@
     "transform": {
       "^.+\\.js$": "babel-jest"
     }
+  },
+  "dependencies": {
+    "create-react-context": "^0.2.3"
   }
 }

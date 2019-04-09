@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { resolving, shallowCopy, getModule } from './util';
+import { withConsumer } from './asynccontext';
+import AsyncChunk from './asyncchunk';
 
 const TIMEOUT = 120000;
 const DELAY = 200;
@@ -12,9 +14,12 @@ const packComponent = comp => (props) => {
     }
     return null;
 };
+const defaultCustomData = data => data;
 /*
  * options
  * @load `function` return a `Promise` instance
+ * @render `function` custom render
+ * @customData `function` custom receiveData
  * @resolveWeak `function` return webpack moduleid
  * @loading `React Element`
  * @error `React Element`
@@ -23,6 +28,8 @@ const packComponent = comp => (props) => {
  */
 const DEFAULTOPTIONS = {
     load: null,
+    render: null,
+    customData: defaultCustomData,
     resolveWeak: null,
     loading: null,
     error: null,
@@ -32,6 +39,8 @@ const DEFAULTOPTIONS = {
 const Dueimport = (option = {}) => {
     const {
         load,
+        render,
+        customData,
         loading,
         error,
         delay,
@@ -42,6 +51,8 @@ const Dueimport = (option = {}) => {
     if (!load) {
         return null;
     }
+    const isHasRender = typeof render === 'function';
+    const chunkName = typeof chunk === 'function' ? chunk() : '';
     // The first letter of the react component
     // name is the uppercase
     const LoadingView = packComponent(loading);
@@ -49,11 +60,29 @@ const Dueimport = (option = {}) => {
     const isDelay = typeof delay === 'number' && delay !== 0;
     const isTimeout = typeof timeout === 'number' && timeout !== 0;
     const preload = () => load();
+    const preloadWeak = () => {
+        const { loaded, cur } = resolving(load, resolveWeak);
+        if (loaded) {
+            return cur;
+        }
+        return null;
+    }
     class AsyncComponent extends Component {
         constructor(props) {
             super(props);
             this.unmount = false;
+            const { report } = props;
             const { loaded, cur } = resolving(load, resolveWeak);
+            if (report && loaded) {
+                const exportStatic = {
+                    chunkName: cur.chunkName,
+                    getInitialData: cur.getInitialData
+                }
+                if (typeof exportStatic.chunkName === 'undefined') {
+                    exportStatic.chunkName = chunkName;
+                }
+                report(exportStatic);
+            }
             this.state = {
                 needDelay: isDelay,
                 err: '',
@@ -151,12 +180,17 @@ const Dueimport = (option = {}) => {
                     error: err
                 });
             }
-            return <LoadComponent {...this.props} />;
+            const { report, ...overProps } = this.props;
+            if (overProps.receiveData) {
+                overProps.receiveData = customData(overProps.receiveData);
+            }
+            return isHasRender ? render(overProps, LoadComponent) : (<LoadComponent {...overProps} />);
         }
     }
-    AsyncComponent.chunk = chunk;
+    AsyncComponent.chunkName = chunkName;
     AsyncComponent.preload = preload;
-    return AsyncComponent;
+    AsyncComponent.preloadWeak = preloadWeak;
+    return withConsumer(AsyncComponent);
 };
 const Asyncimport = (initOptions = {}, dueOptions = {}) => {
     const mergeOption = shallowCopy({}, DEFAULTOPTIONS, initOptions, dueOptions);
@@ -169,4 +203,5 @@ const Asyncimport = (initOptions = {}, dueOptions = {}) => {
         return Dueimport(afterOption);
     };
 };
+export { AsyncChunk };
 export default Asyncimport;

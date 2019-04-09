@@ -97,7 +97,7 @@ describe('AsyncModule memory', () => {
             resolveWeak: () => 2
         });
         const app = shallow(<ViewSecond />);
-        expect(app.html()).toBeNull();
+        expect(app.html()).toBe('');
     });
     test('client not found 2', (done) => {
         expect.assertions(1);
@@ -155,6 +155,37 @@ describe('AsyncModule memory', () => {
             expect(app.html()).toBeNull();
             done();
         }, 200);
+    });
+});
+
+describe('AsyncModule static method', () => {
+    test('preloadWeak succ', () => {
+        const AsyncComponent = AsyncModule({
+            load: () => new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(Home);
+                }, 500);
+            }),
+            resolveWeak: () => 1,
+            loading: <Loading />,
+            error: <ErrorView />
+        });
+        const comp = AsyncComponent.preloadWeak();
+        expect(comp).toEqual(Home);
+    });
+    test('preloadWeak fail', () => {
+        const AsyncComponent = AsyncModule({
+            load: () => new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(Home);
+                }, 500);
+            }),
+            resolveWeak: () => 2,
+            loading: <Loading />,
+            error: <ErrorView />
+        });
+        const comp = AsyncComponent.preloadWeak();
+        expect(comp).toBeNull();
     });
 });
 
