@@ -1,6 +1,6 @@
 {
   "name": "react-asyncmodule",
-  "version": "0.1.4",
+  "version": "1.0.0-alpha.1",
   "description": "react async load component",
   "author": "caoren",
   "keywords": [
@@ -65,7 +65,7 @@
     "style-loader": "^0.18.2",
     "url-loader": "^1.1.1",
     "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.9.2",
+    "webpack-dev-server": "^3.3.0",
     "yargs": "^9.0.1"
   },
   "peerDependencies": {
