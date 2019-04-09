@@ -2,6 +2,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -10,6 +12,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import React, { Component } from 'react';
 import { resolving, shallowCopy, getModule } from './util';
+import { withConsumer } from './asynccontext';
+import AsyncChunk from './asyncchunk';
 
 var TIMEOUT = 120000;
 var DELAY = 200;
@@ -24,9 +28,14 @@ var packComponent = function packComponent(comp) {
         return null;
     };
 };
+var defaultCustomData = function defaultCustomData(data) {
+    return data;
+};
 /*
  * options
  * @load `function` return a `Promise` instance
+ * @render `function` custom render
+ * @customData `function` custom receiveData
  * @resolveWeak `function` return webpack moduleid
  * @loading `React Element`
  * @error `React Element`
@@ -35,6 +44,8 @@ var packComponent = function packComponent(comp) {
  */
 var DEFAULTOPTIONS = {
     load: null,
+    render: null,
+    customData: defaultCustomData,
     resolveWeak: null,
     loading: null,
     error: null,
@@ -44,6 +55,8 @@ var DEFAULTOPTIONS = {
 var Dueimport = function Dueimport() {
     var option = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     var load = option.load,
+        _render = option.render,
+        customData = option.customData,
         loading = option.loading,
         error = option.error,
         delay = option.delay,
@@ -54,6 +67,8 @@ var Dueimport = function Dueimport() {
     if (!load) {
         return null;
     }
+    var isHasRender = typeof _render === 'function';
+    var chunkName = typeof chunk === 'function' ? chunk() : '';
     // The first letter of the react component
     // name is the uppercase
     var LoadingView = packComponent(loading);
@@ -62,6 +77,16 @@ var Dueimport = function Dueimport() {
     var isTimeout = typeof timeout === 'number' && timeout !== 0;
     var preload = function preload() {
         return load();
+    };
+    var preloadWeak = function preloadWeak() {
+        var _resolving = resolving(load, resolveWeak),
+            loaded = _resolving.loaded,
+            cur = _resolving.cur;
+
+        if (loaded) {
+            return cur;
+        }
+        return null;
     };
 
     var AsyncComponent = function (_Component) {
@@ -73,11 +98,22 @@ var Dueimport = function Dueimport() {
             var _this = _possibleConstructorReturn(this, (AsyncComponent.__proto__ || Object.getPrototypeOf(AsyncComponent)).call(this, props));
 
             _this.unmount = false;
+            var report = props.report;
 
-            var _resolving = resolving(load, resolveWeak),
-                loaded = _resolving.loaded,
-                cur = _resolving.cur;
+            var _resolving2 = resolving(load, resolveWeak),
+                loaded = _resolving2.loaded,
+                cur = _resolving2.cur;
 
+            if (report && loaded) {
+                var exportStatic = {
+                    chunkName: cur.chunkName,
+                    getInitialData: cur.getInitialData
+                };
+                if (typeof exportStatic.chunkName === 'undefined') {
+                    exportStatic.chunkName = chunkName;
+                }
+                report(exportStatic);
+            }
             _this.state = {
                 needDelay: isDelay,
                 err: '',
@@ -196,16 +232,25 @@ var Dueimport = function Dueimport() {
                         error: err
                     });
                 }
-                return React.createElement(LoadComponent, this.props);
+
+                var _props = this.props,
+                    report = _props.report,
+                    overProps = _objectWithoutProperties(_props, ['report']);
+
+                if (overProps.receiveData) {
+                    overProps.receiveData = customData(overProps.receiveData);
+                }
+                return isHasRender ? _render(overProps, LoadComponent) : React.createElement(LoadComponent, overProps);
             }
         }]);
 
         return AsyncComponent;
     }(Component);
 
-    AsyncComponent.chunk = chunk;
+    AsyncComponent.chunkName = chunkName;
     AsyncComponent.preload = preload;
-    return AsyncComponent;
+    AsyncComponent.preloadWeak = preloadWeak;
+    return withConsumer(AsyncComponent);
 };
 var Asyncimport = function Asyncimport() {
     var initOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -223,4 +268,5 @@ var Asyncimport = function Asyncimport() {
         return Dueimport(afterOption);
     };
 };
+export { AsyncChunk };
 export default Asyncimport;

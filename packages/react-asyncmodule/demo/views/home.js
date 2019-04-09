@@ -14,4 +14,7 @@ class Home extends Component {
         );
     }
 }
+Home.fetchData = () => {
+    console.log('=home=');
+};
 export default Home;
