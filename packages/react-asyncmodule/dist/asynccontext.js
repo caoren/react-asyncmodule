@@ -30,7 +30,7 @@ var withConsumer = exports.withConsumer = function withConsumer(Component) {
             AsyncConsumer,
             null,
             function (asyncProp) {
-                return _react2.default.createElement(Component, _extends({}, props, { report: asyncProp.report, receiveData: asyncProp.receiveData }));
+                return _react2.default.createElement(Component, _extends({}, props, asyncProp));
             }
         );
     };

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { configure, shallow, render, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-15';
+import Adapter from 'enzyme-adapter-react-16';
 import AsyncChunk from '../src/asyncchunk';
 import AsyncModule from '../src/index';
 
@@ -62,13 +62,10 @@ describe('Asyncchunk', () => {
             </AsyncChunk>
         );
         expect(modules).toHaveLength(1);
-        expect(modules[0]).toEqual({
-            chunkName: 'testa',
-            getInitialData: undefined
-        });
+        expect(modules[0].chunkName).toBe('testa');
     });
     test('receiveData', () => {
-        const receiveData = { c: 1 };
+        const receiveData = { testa:  { c: 1 } };
         const app = mount(
             <AsyncChunk receiveData={receiveData}>
                 <AsyncComponent />
@@ -87,8 +84,7 @@ describe('Asyncchunk', () => {
             resolveWeak: () => 1,
             loading: <Loading />,
             error: <ErrorView />,
-            chunk: () => 'testa',
-            customData: data => data.b
+            chunk: () => 'b'
         });
         const app = mount(
             <AsyncChunk receiveData={receiveData}>

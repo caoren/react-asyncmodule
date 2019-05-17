@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React, { Component } from 'react';
 import { configure, shallow, render, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-15';
+import Adapter from 'enzyme-adapter-react-16';
 import AsyncModule from '../src/index';
 
 configure({ adapter: new Adapter() });
@@ -63,7 +63,7 @@ describe('AsyncModule memory', () => {
             }),
             resolveWeak: () => 1
         });
-        const app = shallow(<ViewFirst />);
+        const app = mount(<ViewFirst />);
         expect(app.html()).toBe('<div class="m-home">首页</div>');
     });
     test('client timeout', (done) => {
@@ -152,7 +152,7 @@ describe('AsyncModule memory', () => {
         const app = mount(<ViewFouth />);
         setTimeout(() => {
             app.simulate('click');
-            expect(app.html()).toBeNull();
+            expect(app.html()).toBe('<div class="m-error">加载失败</div>');
             done();
         }, 200);
     });
@@ -225,7 +225,8 @@ class Loadtm extends Component{
 }
 describe('AsyncModule error', () => {
     test('class loading', (done) => {
-        expect.assertions(1);
+        expect.assertions(2);
+        const mockLoaded = jest.fn();
         const SyncCom = AsyncModule({
             loading: Loadtm,
             delay: 0,
@@ -235,11 +236,13 @@ describe('AsyncModule error', () => {
                     resolve(Home);
                 }, 100);
             }),
-            resolveWeak: () => 2
+            resolveWeak: () => 2,
+            onModuleLoaded: mockLoaded
         });
         const app = mount(<SyncCom />);
         setTimeout(() => {
             expect(app.html()).toBe('<div class="m-home">首页</div>');
+            expect(mockLoaded.mock.calls).toHaveLength(1);
             done();
         }, 200);
     });

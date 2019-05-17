@@ -8,7 +8,7 @@ class Home extends Component {
     render() {
         return (
             <div className="m-home">
-                首页<br />
+                首页123458786qweq<br />
                 <Link to="/list">列表</Link>
             </div>
         );

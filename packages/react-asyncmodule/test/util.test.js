@@ -4,7 +4,7 @@ import {
     isWebpack,
     getModule,
     requireById,
-    resolving,
+    syncModule,
     shallowCopy,
 } from '../src/util';
 
@@ -53,22 +53,12 @@ describe('util not webpack', () => {
     test('requireById', () => {
         expect(requireById(1)).toBeNull();
     });
-    test('resolving', () => {
-        const load = () => {
-            return new Promise((resolve) => {
-                resolve({});
-            });
-        }
+    test('syncModule', () => {
         const resolveWeak = () => 1;
-        expect(resolving(load, resolveWeak)).toEqual({
-                loaded: false,
-                cur: null
-            });
+        expect(syncModule(resolveWeak)).toBeNull();
     });
-    test('resolving', () => {
-        expect(resolving()).toEqual({
-            loaded: false
-        });
+    test('syncModule', () => {
+        expect(syncModule()).toBeNull();
     });
 });
 
@@ -97,28 +87,12 @@ describe('util webpack', () => {
     test('isWebpack', () => {
         expect(isWebpack()).toBeTruthy();
     });
-    test('resolving exist', () => {
-        const load = () => {
-            return new Promise((resolve) => {
-                resolve({});
-            });
-        }
+    test('syncModule exist', () => {
         const resolveWeak = () => 1;
-        expect(resolving(load, resolveWeak)).toEqual({
-                loaded: true,
-                cur: { a: 1}
-            });
+        expect(syncModule(resolveWeak)).toEqual({ a: 1});
     });
-    test('resolving nothing', () => {
-        const load = () => {
-            return new Promise((resolve) => {
-                resolve({});
-            });
-        }
+    test('syncModule nothing', () => {
         const resolveWeak = () => 2;
-        expect(resolving(load, resolveWeak)).toEqual({
-                loaded: false,
-                cur: null
-            });
+        expect(syncModule(resolveWeak)).toEqual(null);
     });
 });

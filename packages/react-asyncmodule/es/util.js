@@ -38,27 +38,17 @@ export var requireById = function requireById(id) {
     }
     return null;
 };
-export var resolving = function resolving(load, resolveWeak) {
+// sync fetch corresponding component
+// webpack if module exist, must find `__webpack_modules__`
+export var syncModule = function syncModule(resolveWeak) {
     if (!resolveWeak) {
-        return {
-            loaded: false
-        };
+        return null;
     }
     var weakId = resolveWeak();
-    var isloaded = true;
-    // server side `require` is sync
-    if (isServer()) {
-        load();
-    } else {
-        // equal to __webpack_require__.m
-        isloaded = !!__webpack_modules__[weakId]; // eslint-disable-line
+    // `__webpack_modules__` equal to `__webpack_require__.m`
+    if (__webpack_modules__[weakId]) {
+        // eslint-disable-line
+        return requireById(weakId);
     }
-    var com = isloaded ? requireById(weakId) : null;
-    if (!com) {
-        isloaded = false;
-    }
-    return {
-        loaded: isloaded,
-        cur: com
-    };
+    return null;
 };

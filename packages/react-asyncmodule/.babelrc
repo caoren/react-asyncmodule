@@ -1,15 +1,13 @@
 {
-  "presets": [
-    "stage-0",
-    "react"
-  ],
   "env": {
     "commonjs": {
       "presets": [
         ["env", {
           modules : "commonjs",
           useBuiltIns: true
-        }]
+        }],
+        "stage-0",
+        "react"
       ],
       "plugins": [
         "add-module-exports"
@@ -19,14 +17,18 @@
       "presets": [
         ["env", {
           modules : false
-        }]
+        }],
+        "stage-0",
+        "react"
       ]
     },
     "test": {
       "presets": [
         ["env", {
           modules : "commonjs"
-        }]
+        }],
+        "stage-0",
+        "react"
       ]
     }
   }

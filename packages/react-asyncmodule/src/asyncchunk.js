@@ -1,12 +1,12 @@
 import React from 'react';
-import { AsyncProvider } from "./asynccontext";
+import { AsyncProvider } from './asynccontext';
 
-const AsyncChunk = ({ report, receiveData, children }) => {
-    const providerValue = { report, receiveData };
+const AsyncChunk = (props) => {
+    const { children, ...providerValue } = props;
     return (
         <AsyncProvider value={providerValue}>
             {children}
         </AsyncProvider>
     );
-}
+};
 export default AsyncChunk;
