@@ -164,3 +164,11 @@ const List = AsyncModule({
 ### timeout
 
 默认 `120000` ms。 加载超时，单位ms。
+
+### onModuleLoaded
+
+module加载完执行，返回2个参数，comp当前module，chunkName当前module的chunk名称
+
+`onModuleLoaded(comp, chunkName)`
+
+

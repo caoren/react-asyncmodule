@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
-import { BrowserRouter, Route, Link } from 'react-router-dom'; // eslint-disable-line
+import { BrowserRouter, Route } from 'react-router-dom'; // eslint-disable-line
+import { hot } from 'react-hot-loader/root'; // eslint-disable-line
 import AsyncModule from '../src/index';
 
-const Loading = () => (<div className="f-fullhg"><div className="m-loading">加载中...</div></div>);
+const Loading = (<div className="f-fullhg"><div className="m-loading">加载中...</div></div>);
 const ErrorView = ({ onRetry }) => (<div className="f-fullhg"><div className="m-error" onClick={onRetry}>加载失败</div></div>);
 
 const AsyncComponent = AsyncModule({
-    loading: <Loading />,
+    loading: Loading,
     error: <ErrorView />
 });
 
@@ -36,7 +36,4 @@ class App extends Component {
         );
     }
 }
-ReactDOM.render(
-    <App />,
-    document.getElementById('J_wrap')
-);
+export default hot(App);

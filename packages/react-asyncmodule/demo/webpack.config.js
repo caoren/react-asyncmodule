@@ -9,7 +9,7 @@ const env = args.env;
 const isDeploy = env === 'production';
 const config = {
     entry: {
-        test: path.resolve(__dirname, 'app.js')
+        test: path.resolve(__dirname, 'index.js')
     },
     output: {
         path: path.resolve(__dirname, '../demo'),
@@ -45,10 +45,12 @@ const config = {
                                 debug: true,
                                 useBuiltIns: true
                             }],
-                            'react'
+                            'react',
+                            'stage-0'
                         ],
                         plugins: [
-                            'syntax-dynamic-import'
+                            'syntax-dynamic-import',
+                            'react-hot-loader/babel'
                         ],
                         cacheDirectory: true
                     }

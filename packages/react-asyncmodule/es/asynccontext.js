@@ -13,7 +13,7 @@ export var withConsumer = function withConsumer(Component) {
             AsyncConsumer,
             null,
             function (asyncProp) {
-                return React.createElement(Component, _extends({}, props, { report: asyncProp.report, receiveData: asyncProp.receiveData }));
+                return React.createElement(Component, _extends({}, props, asyncProp));
             }
         );
     };

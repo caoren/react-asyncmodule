@@ -1,12 +1,12 @@
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
 import React from 'react';
-import { AsyncProvider } from "./asynccontext";
+import { AsyncProvider } from './asynccontext';
 
-var AsyncChunk = function AsyncChunk(_ref) {
-    var report = _ref.report,
-        receiveData = _ref.receiveData,
-        children = _ref.children;
+var AsyncChunk = function AsyncChunk(props) {
+    var children = props.children,
+        providerValue = _objectWithoutProperties(props, ['children']);
 
-    var providerValue = { report: report, receiveData: receiveData };
     return React.createElement(
         AsyncProvider,
         { value: providerValue },
