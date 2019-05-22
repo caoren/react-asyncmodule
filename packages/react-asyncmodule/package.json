@@ -1,6 +1,6 @@
 {
   "name": "react-asyncmodule",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "react async load component",
   "author": "caoren",
   "keywords": [
@@ -31,6 +31,7 @@
     "babel-jest": "^22.2.2",
     "babel-loader": "^7.1.2",
     "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-asyncmodule-import": "^0.2.0",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-react": "^6.24.1",

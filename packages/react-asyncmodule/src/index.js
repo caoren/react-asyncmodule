@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
-import { shallowCopy, getModule, syncModule } from './util';
+import { shallowCopy, getModule, syncModule, isServer } from './util';
 import { withConsumer } from './asynccontext';
 import AsyncChunk from './asyncchunk';
 
@@ -82,7 +82,7 @@ const Dueimport = (option = {}) => {
             super(props);
             this.unmount = false;
             const { report } = props;
-            const comp = syncModule(resolveWeak);
+            const comp = syncModule(resolveWeak, load);
             if (report && comp) {
                 const exportStatic = {};
                 hoistNonReactStatics(exportStatic, comp);
@@ -98,6 +98,8 @@ const Dueimport = (option = {}) => {
             this.changeState = this.changeState.bind(this);
             if (!comp) {
                 this.loadComp();
+            } else if (onModuleLoaded) {
+                onModuleLoaded(comp, chunkName, isServer());
             }
         }
         changeState(state = {}) {
@@ -145,7 +147,7 @@ const Dueimport = (option = {}) => {
                     err: ''
                 });
                 if (onModuleLoaded) {
-                    onModuleLoaded(comp, chunkName);
+                    onModuleLoaded(comp, chunkName, false);
                 }
             }).catch((e) => {
                 this.clearTime();

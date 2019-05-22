@@ -49,11 +49,19 @@ describe('AsyncModule memory', () => {
     afterAll(() => {
         delete global.AsyncCommon;
     });
-    test('client found', () => {
+    test('client found', (done) => {
+        expect.assertions(5);
+        const mockLoaded = jest.fn((comp, chunkName, isServer) => {
+            expect(comp).toEqual(Home);
+            expect(chunkName).toBe('home');
+            expect(isServer).toBeFalsy();
+            done();
+        });
         const AsyncComponent = AsyncModule({
             loading: <Loading />,
             error: <ErrorView />,
-            timeout: 0
+            timeout: 0,
+            onModuleLoaded: mockLoaded
         });
         const ViewFirst = AsyncComponent({
             load: () => new Promise((resolve) => {
@@ -61,13 +69,14 @@ describe('AsyncModule memory', () => {
                     resolve(Home);
                 }, 500);
             }),
-            resolveWeak: () => 1
+            resolveWeak: () => 1,
+            chunk: () => 'home'
         });
         const app = mount(<ViewFirst />);
         expect(app.html()).toBe('<div class="m-home">首页</div>');
+        expect(mockLoaded).toHaveBeenCalledTimes(1);
     });
-    test('client timeout', (done) => {
-        expect.assertions(1);
+    test('client timeout', () => {
         const AsyncComponent = AsyncModule({
             loading: <Loading />,
             error: <ErrorView />,
@@ -81,26 +90,14 @@ describe('AsyncModule memory', () => {
             }),
             resolveWeak: () => 2
         });
+        jest.useFakeTimers();
         const app = mount(<ViewTime />);
-        setTimeout(() => {
-            expect(app.html()).toBe('<div class="m-error">加载失败</div>');
-            done();
-        }, 200);
-    });
-    test('client not found 1', () => {
-        const ViewSecond = AsyncCommon({
-            load: () => new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(Home);
-                }, 500);
-            }),
-            resolveWeak: () => 2
-        });
-        const app = shallow(<ViewSecond />);
-        expect(app.html()).toBe('');
+        jest.advanceTimersByTime(100);
+        expect(app.html()).toBe('<div class="m-error">加载失败</div>');
+        jest.useRealTimers();
     });
     test('client not found 2', (done) => {
-        expect.assertions(1);
+        expect.assertions(4);
         const ViewSecond = AsyncCommon({
             load: () => new Promise((resolve) => {
                 setTimeout(() => {
@@ -109,27 +106,20 @@ describe('AsyncModule memory', () => {
             }),
             resolveWeak: () => 2
         });
+        jest.useFakeTimers();
         const app = mount(<ViewSecond />);
-        setTimeout(() => {
-            expect(app.html()).toBe('<div class="m-loading">加载中...</div>');
-            done();
-        }, 300);
-    });
-    test('client not found 3', (done) => {
-        expect.assertions(1);
-        const ViewSecond = AsyncCommon({
-            load: () => new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(Home);
-                }, 500);
-            }),
-            resolveWeak: () => 2
-        });
-        const app = mount(<ViewSecond />);
+        // delay time and load time
+        expect(setTimeout).toHaveBeenCalledTimes(2);
+        expect(app.html()).toBeNull();
+        jest.advanceTimersByTime(300);
+        expect(app.html()).toBe('<div class="m-loading">加载中...</div>');
+        jest.advanceTimersByTime(600);
+        jest.useRealTimers();
+        // react render need a little time
         setTimeout(() => {
             expect(app.html()).toBe('<div class="m-home">首页</div>');
             done();
-        }, 600);
+        }, 100);
     });
     test('client found error', (done) => {
         expect.assertions(1);
@@ -137,11 +127,14 @@ describe('AsyncModule memory', () => {
             load: () => Promise.reject('load err'),
             resolveWeak: () => 2
         });
+        jest.useFakeTimers();
         const app = mount(<ViewThrid />);
+        jest.advanceTimersByTime(300);
+        jest.useRealTimers();
         setTimeout(() => {
             expect(app.html()).toBe('<div class="m-error">加载失败</div>');
             done();
-        }, 200);
+        }, 100);
     });
     test('client found error try', (done) => {
         expect.assertions(1);
@@ -159,6 +152,40 @@ describe('AsyncModule memory', () => {
 });
 
 describe('AsyncModule static method', () => {
+    test('preload sync succ', (done) => {
+        const AsyncComponent = AsyncModule({
+            load: () => new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(Home);
+                }, 500);
+            }),
+            resolveWeak: () => 1,
+            loading: <Loading />,
+            error: <ErrorView />
+        });
+        const comp = AsyncComponent.preload();
+        comp.then((comp) => {
+            expect(comp).toEqual(Home);
+            done();
+        });
+    });
+    test('preload async succ', (done) => {
+        const AsyncComponent = AsyncModule({
+            load: () => new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(Home);
+                }, 500);
+            }),
+            resolveWeak: () => 2,
+            loading: <Loading />,
+            error: <ErrorView />
+        });
+        const comp = AsyncComponent.preload();
+        comp.then((comp) => {
+            expect(comp).toEqual(Home);
+            done();
+        });
+    });
     test('preloadWeak succ', () => {
         const AsyncComponent = AsyncModule({
             load: () => new Promise((resolve) => {

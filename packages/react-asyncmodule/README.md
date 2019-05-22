@@ -167,8 +167,12 @@ const List = AsyncModule({
 
 ### onModuleLoaded
 
-module加载完执行，返回2个参数，comp当前module，chunkName当前module的chunk名称
+module加载完执行，返回3个参数
 
-`onModuleLoaded(comp, chunkName)`
+* comp, 当前module
+* chunkName, 当前module的chunk名称
+* isServer, 当前是否为 node 端
+
+`onModuleLoaded(comp, chunkName, isServer)`
 
 

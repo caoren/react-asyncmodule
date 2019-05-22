@@ -8,19 +8,16 @@ const ErrorView = ({ onRetry }) => (<div className="f-fullhg"><div className="m-
 
 const AsyncComponent = AsyncModule({
     loading: Loading,
-    error: <ErrorView />
+    error: <ErrorView />,
+    onModuleLoaded: (comp, chunkName, isServer) => {
+        console.log(comp, chunkName, isServer);
+    }
 });
 
-const Home = AsyncComponent({
-    load: () => import(/* webpackChunkName: "home" */ './views/home'),
-    resolveWeak: () => require.resolveWeak('./views/home')
-});
-
-const List = AsyncComponent({
-    load: () => import(/* webpackChunkName: "list" */ './views/list'),
-    resolveWeak: () => require.resolveWeak('./views/list')
-});
+const Home = AsyncComponent(import(/* webpackChunkName: "home" */ './views/home'));
+const List = AsyncComponent(import(/* webpackChunkName: "list" */ './views/list'));
 Home.preload();
+
 class App extends Component {
     constructor(props) {
         super(props);
