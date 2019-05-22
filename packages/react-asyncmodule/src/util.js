@@ -20,7 +20,12 @@ export const shallowCopy = (target, ...args) => {
     }
     return newTarget;
 };
-export const isServer = () => !(
+let testServer = false;
+// only use test
+export const setTestServer = (bool) => {
+    testServer = bool;
+};
+export const isServer = () => testServer || !(
     typeof window !== 'undefined'
     && window.document
     && window.document.createElement
@@ -35,13 +40,16 @@ export const requireById = (id) => {
 };
 // sync fetch corresponding component
 // webpack if module exist, must find `__webpack_modules__`
-export const syncModule = (resolveWeak) => {
+export const syncModule = (resolveWeak, load) => {
     if (!resolveWeak) {
         return null;
     }
     const weakId = resolveWeak();
     // `__webpack_modules__` equal to `__webpack_require__.m`
     if (__webpack_modules__[weakId]) { // eslint-disable-line
+        return requireById(weakId);
+    } else if (load && isServer()) {
+        load();
         return requireById(weakId);
     }
     return null;

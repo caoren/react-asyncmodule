@@ -126,7 +126,7 @@ var Dueimport = function Dueimport() {
             _this.unmount = false;
             var report = props.report;
 
-            var comp = (0, _util.syncModule)(resolveWeak);
+            var comp = (0, _util.syncModule)(resolveWeak, load);
             if (report && comp) {
                 var exportStatic = {};
                 (0, _hoistNonReactStatics2.default)(exportStatic, comp);
@@ -142,6 +142,8 @@ var Dueimport = function Dueimport() {
             _this.changeState = _this.changeState.bind(_this);
             if (!comp) {
                 _this.loadComp();
+            } else if (onModuleLoaded) {
+                onModuleLoaded(comp, chunkName, (0, _util.isServer)());
             }
             return _this;
         }
@@ -203,7 +205,7 @@ var Dueimport = function Dueimport() {
                         err: ''
                     });
                     if (onModuleLoaded) {
-                        onModuleLoaded(comp, chunkName);
+                        onModuleLoaded(comp, chunkName, false);
                     }
                 }).catch(function (e) {
                     _this2.clearTime();

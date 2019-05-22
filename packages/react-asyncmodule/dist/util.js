@@ -29,8 +29,13 @@ var shallowCopy = exports.shallowCopy = function shallowCopy(target) {
     }
     return newTarget;
 };
+var testServer = false;
+// only use test
+var setTestServer = exports.setTestServer = function setTestServer(bool) {
+    testServer = bool;
+};
 var isServer = exports.isServer = function isServer() {
-    return !(typeof window !== 'undefined' && window.document && window.document.createElement);
+    return testServer || !(typeof window !== 'undefined' && window.document && window.document.createElement);
 };
 var isWebpack = exports.isWebpack = function isWebpack() {
     return typeof __webpack_require__ !== 'undefined';
@@ -46,7 +51,7 @@ var requireById = exports.requireById = function requireById(id) {
 };
 // sync fetch corresponding component
 // webpack if module exist, must find `__webpack_modules__`
-var syncModule = exports.syncModule = function syncModule(resolveWeak) {
+var syncModule = exports.syncModule = function syncModule(resolveWeak, load) {
     if (!resolveWeak) {
         return null;
     }
@@ -54,6 +59,9 @@ var syncModule = exports.syncModule = function syncModule(resolveWeak) {
     // `__webpack_modules__` equal to `__webpack_require__.m`
     if (__webpack_modules__[weakId]) {
         // eslint-disable-line
+        return requireById(weakId);
+    } else if (load && isServer()) {
+        load();
         return requireById(weakId);
     }
     return null;

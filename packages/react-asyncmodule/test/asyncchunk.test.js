@@ -21,6 +21,8 @@ class Home extends Component {
         );
     }
 }
+Home.getData = () => {}
+Home.testProperty = 'test';
 
 const Loading = () => (<div className="m-loading">加载中...</div>);
 const ErrorView = ({ onRetry }) => (<div className="m-error" onClick={onRetry}>加载失败</div>);
@@ -63,6 +65,8 @@ describe('Asyncchunk', () => {
         );
         expect(modules).toHaveLength(1);
         expect(modules[0].chunkName).toBe('testa');
+        expect(modules[0].testProperty).toBe('test');
+        expect(modules[0].getData).toBeInstanceOf(Function);
     });
     test('receiveData', () => {
         const receiveData = { testa:  { c: 1 } };

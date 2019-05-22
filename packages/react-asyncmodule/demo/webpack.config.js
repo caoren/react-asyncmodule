@@ -50,6 +50,7 @@ const config = {
                         ],
                         plugins: [
                             'syntax-dynamic-import',
+                            'asyncmodule-import',
                             'react-hot-loader/babel'
                         ],
                         cacheDirectory: true

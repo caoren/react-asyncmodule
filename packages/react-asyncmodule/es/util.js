@@ -23,8 +23,13 @@ export var shallowCopy = function shallowCopy(target) {
     }
     return newTarget;
 };
+var testServer = false;
+// only use test
+export var setTestServer = function setTestServer(bool) {
+    testServer = bool;
+};
 export var isServer = function isServer() {
-    return !(typeof window !== 'undefined' && window.document && window.document.createElement);
+    return testServer || !(typeof window !== 'undefined' && window.document && window.document.createElement);
 };
 export var isWebpack = function isWebpack() {
     return typeof __webpack_require__ !== 'undefined';
@@ -40,7 +45,7 @@ export var requireById = function requireById(id) {
 };
 // sync fetch corresponding component
 // webpack if module exist, must find `__webpack_modules__`
-export var syncModule = function syncModule(resolveWeak) {
+export var syncModule = function syncModule(resolveWeak, load) {
     if (!resolveWeak) {
         return null;
     }
@@ -48,6 +53,9 @@ export var syncModule = function syncModule(resolveWeak) {
     // `__webpack_modules__` equal to `__webpack_require__.m`
     if (__webpack_modules__[weakId]) {
         // eslint-disable-line
+        return requireById(weakId);
+    } else if (load && isServer()) {
+        load();
         return requireById(weakId);
     }
     return null;

@@ -10,7 +10,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import React, { Component } from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
-import { shallowCopy, getModule, syncModule } from './util';
+import { shallowCopy, getModule, syncModule, isServer } from './util';
 import { withConsumer } from './asynccontext';
 import AsyncChunk from './asyncchunk';
 
@@ -107,7 +107,7 @@ var Dueimport = function Dueimport() {
             _this.unmount = false;
             var report = props.report;
 
-            var comp = syncModule(resolveWeak);
+            var comp = syncModule(resolveWeak, load);
             if (report && comp) {
                 var exportStatic = {};
                 hoistNonReactStatics(exportStatic, comp);
@@ -123,6 +123,8 @@ var Dueimport = function Dueimport() {
             _this.changeState = _this.changeState.bind(_this);
             if (!comp) {
                 _this.loadComp();
+            } else if (onModuleLoaded) {
+                onModuleLoaded(comp, chunkName, isServer());
             }
             return _this;
         }
@@ -184,7 +186,7 @@ var Dueimport = function Dueimport() {
                         err: ''
                     });
                     if (onModuleLoaded) {
-                        onModuleLoaded(comp, chunkName);
+                        onModuleLoaded(comp, chunkName, false);
                     }
                 }).catch(function (e) {
                     _this2.clearTime();
