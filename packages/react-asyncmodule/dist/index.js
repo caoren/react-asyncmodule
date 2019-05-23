@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.AsyncChunk = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -15,13 +14,9 @@ var _hoistNonReactStatics = require('hoist-non-react-statics');
 
 var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 
+var _reactAsyncmoduleChunk = require('react-asyncmodule-chunk');
+
 var _util = require('./util');
-
-var _asynccontext = require('./asynccontext');
-
-var _asyncchunk = require('./asyncchunk');
-
-var _asyncchunk2 = _interopRequireDefault(_asyncchunk);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -256,7 +251,7 @@ var Dueimport = function Dueimport() {
 
     AsyncComponent.chunkName = chunkName;
 
-    return (0, _asynccontext.withConsumer)(AsyncComponent);
+    return (0, _reactAsyncmoduleChunk.withConsumer)(AsyncComponent);
 };
 var Asyncimport = function Asyncimport() {
     var initOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -273,5 +268,5 @@ var Asyncimport = function Asyncimport() {
         return Dueimport(afterOption);
     };
 };
-exports.AsyncChunk = _asyncchunk2.default;
 exports.default = Asyncimport;
+module.exports = exports['default'];

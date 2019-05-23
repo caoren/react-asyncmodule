@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
+import hoistNonReactStatics from 'hoist-non-react-statics';
 import { configure, shallow, render, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import AsyncChunk from '../src/asyncchunk';
-import AsyncModule from '../src/index';
+import AsyncChunk, { withConsumer } from '../src/index';
 
 configure({ adapter: new Adapter() });
 
+const customData = (data = {}, chunkName) => data[chunkName];
 class Home extends Component {
     constructor(props) {
         super(props);
+
     }
     render() {
         const { receiveData } = this.props;
@@ -24,35 +26,32 @@ class Home extends Component {
 Home.getData = () => {}
 Home.testProperty = 'test';
 
-const Loading = () => (<div className="m-loading">加载中...</div>);
-const ErrorView = ({ onRetry }) => (<div className="m-error" onClick={onRetry}>加载失败</div>);
-
-beforeAll(() => {
-    global.__webpack_require__ = (id) => {
-        if (id === 1) {
-            return Home;
+const AsyncModule = (options) => {
+    const chunkName = options.chunk();
+    class AsyncComponent extends Component {
+        constructor(props) {
+            super(props);
+            const { report } = props;
+            if (report) {
+                const exportStatic = {};
+                hoistNonReactStatics(exportStatic, Home);
+                exportStatic.chunkName = chunkName;
+                report(exportStatic);
+            }
         }
-        return null;
+        render() {
+            const { report, ...overProps } = this.props;
+            if (overProps.receiveData) {
+                overProps.receiveData = customData(overProps.receiveData, chunkName);
+            }
+            return (<Home {...overProps} />);
+        }
     }
-    global.__webpack_modules__ = {
-        1: { a: 1 }
-    }
-});
-afterAll(() => {
-    delete global.__webpack_require__;
-    delete global.__webpack_modules__;
-});
+    return withConsumer(AsyncComponent);
+}
 
 describe('Asyncchunk', () => {
     const AsyncComponent = AsyncModule({
-        load: () => new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(Home);
-            }, 500);
-        }),
-        resolveWeak: () => 1,
-        loading: <Loading />,
-        error: <ErrorView />,
         chunk: () => 'testa'
     });
     test('report', () => {
@@ -80,14 +79,6 @@ describe('Asyncchunk', () => {
     test('custom receiveData', () => {
         const receiveData = { b : { c: 2 } };
         const AsyncComponentsec = AsyncModule({
-            load: () => new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(Home);
-                }, 500);
-            }),
-            resolveWeak: () => 1,
-            loading: <Loading />,
-            error: <ErrorView />,
             chunk: () => 'b'
         });
         const app = mount(

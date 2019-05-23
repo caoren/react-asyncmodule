@@ -10,9 +10,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import React, { Component } from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
+import { withConsumer } from 'react-asyncmodule-chunk';
 import { shallowCopy, getModule, syncModule, isServer } from './util';
-import { withConsumer } from './asynccontext';
-import AsyncChunk from './asyncchunk';
 
 var TIMEOUT = 120000;
 var DELAY = 200;
@@ -254,5 +253,4 @@ var Asyncimport = function Asyncimport() {
         return Dueimport(afterOption);
     };
 };
-export { AsyncChunk };
 export default Asyncimport;

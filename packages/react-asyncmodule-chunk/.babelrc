@@ -1,0 +1,34 @@
+{
+  "env": {
+    "commonjs": {
+      "presets": [
+        ["env", {
+          modules : "commonjs"
+        }],
+        "stage-0",
+        "react"
+      ],
+      "plugins": [
+        "add-module-exports"
+      ]
+    },
+    "es": {
+      "presets": [
+        ["env", {
+          modules : false
+        }],
+        "stage-0",
+        "react"
+      ]
+    },
+    "test": {
+      "presets": [
+        ["env", {
+          modules : "commonjs"
+        }],
+        "stage-0",
+        "react"
+      ]
+    }
+  }
+}

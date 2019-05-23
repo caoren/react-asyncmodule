@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import hoistNonReactStatics from 'hoist-non-react-statics';
+import { withConsumer } from 'react-asyncmodule-chunk';
 import { shallowCopy, getModule, syncModule, isServer } from './util';
-import { withConsumer } from './asynccontext';
-import AsyncChunk from './asyncchunk';
 
 const TIMEOUT = 120000;
 const DELAY = 200;
@@ -199,5 +198,4 @@ const Asyncimport = (initOptions = {}) => {
         return Dueimport(afterOption);
     };
 };
-export { AsyncChunk };
 export default Asyncimport;

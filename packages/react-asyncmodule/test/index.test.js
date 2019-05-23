@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import { configure, shallow, render, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import AsyncChunk from 'react-asyncmodule-chunk';
 import AsyncModule from '../src/index';
 
 configure({ adapter: new Adapter() });
@@ -11,13 +12,18 @@ class Home extends Component {
         super(props);
     }
     render() {
+        const { receiveData } = this.props;
+        const { c } = receiveData || {};
+        const text = c ? `首页${c}` : '首页';
         return (
             <div className="m-home">
-                首页
+                {text}
             </div>
         );
     }
 }
+Home.getData = () => {}
+Home.testProperty = 'test';
 
 const Loading = () => (<div className="m-loading">加载中...</div>);
 const ErrorView = ({ onRetry }) => (<div className="m-error" onClick={onRetry}>加载失败</div>);
@@ -287,5 +293,41 @@ describe('AsyncModule error', () => {
             expect(app.html()).toBeNull();
             done();
         }, 200);
+    });
+});
+
+describe('AsyncChunk', () => {
+    const AsyncComponent = AsyncModule({
+        load: () => new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(Home);
+            }, 500);
+        }),
+        resolveWeak: () => 1,
+        loading: <Loading />,
+        error: <ErrorView />,
+        chunk: () => 'testa'
+    });
+    test('report', () => {
+        const modules = [];
+        const report = (module) => modules.push(module);
+        const app = mount(
+            <AsyncChunk report={report}>
+                <AsyncComponent />
+            </AsyncChunk>
+        );
+        expect(modules).toHaveLength(1);
+        expect(modules[0].chunkName).toBe('testa');
+        expect(modules[0].testProperty).toBe('test');
+        expect(modules[0].getData).toBeInstanceOf(Function);
+    });
+    test('receiveData', () => {
+        const receiveData = { testa:  { c: 1 } };
+        const app = mount(
+            <AsyncChunk receiveData={receiveData}>
+                <AsyncComponent />
+            </AsyncChunk>
+        );
+        expect(app.html()).toBe('<div class="m-home">首页1</div>');
     });
 });
