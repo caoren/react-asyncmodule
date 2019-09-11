@@ -253,6 +253,7 @@ var Dueimport = function Dueimport() {
 
     return (0, _reactAsyncmoduleChunk.withConsumer)(AsyncComponent);
 };
+
 var Asyncimport = function Asyncimport() {
     var initOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
@@ -268,5 +269,6 @@ var Asyncimport = function Asyncimport() {
         return Dueimport(afterOption);
     };
 };
+
 exports.default = Asyncimport;
 module.exports = exports['default'];

@@ -1,6 +1,6 @@
 {
   "name": "react-asyncmodule-chunk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "react asyncmodule chunk",
   "author": "caoren",
   "sideEffects": false,
@@ -53,7 +53,7 @@
     "react-dom": ">=15.3.0"
   },
   "dependencies": {
-    "create-react-context": "^0.2.3",
+    "create-react-context": ">=0.3.0",
     "hoist-non-react-statics": "^3.3.0"
   },
   "engines": {

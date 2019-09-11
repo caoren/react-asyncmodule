@@ -1,55 +1,39 @@
-const isArray = (arr) => {
-    if (typeof arr !== 'object') {
-        return false;
-    }
-    return arr instanceof Array;
-}
-const arrayFind = (arr, func) => {
-    if (!isArray(arr)) {
-        return undefined;
-    }
-    const len = arr.length;
-    let res;
-    for (let i = 0; i < len; i += 1) {
-        if (func(arr[i], i, arr)) {
-            res = arr[i];
-            break;
-        }
-    }
-    return res;
-}
-const strEndswith = (str = '', key, len) => {
-    let slen = len;
-    if (len === undefined || len > str.length) {
-        slen = str.length;
-    }
-    return str.substring(slen - key.length, len) === key;
-}
 /*
- * fetch css chunks
- * compilation's chunks and Stats's chunks is diff
- * compilation is `name`
- * Stats is `names`
+ * stats 为 webpack 的 Compiler.hooks.done 回调中传入
+ * entrypoints 对应 entry
+ * nameChunksGroups 对应所有的chunk
+ * publicPath 对应 webpack 的 output 配置下的publicPath
  */
-const createAssets = (chunks = [], publicPath = '') => {
-    return chunks.reduce((hash, { name, names = [], files }) => {
-        const nhash = hash;
-        if (!isArray(files)) {
-            return nhash;
+import { ENTRYKEY, filterJs, filterCss } from './helper';
+const createAssets = (stats = {}) => {
+    const { entrypoints, namedChunkGroups = {}, publicPath } = stats;
+    // 拼接完整url
+    const addPublicPath = item => `${publicPath}${item}`;
+    const entryKey = entrypoints ? Object.keys(entrypoints)[0] : '@NOTFOUND';
+    const entryChunks = namedChunkGroups[entryKey];
+    // 去除runtime(runtime建议内联到html中)
+    const entryAssets = entryChunks ? entryChunks.assets.filter(item => item.indexOf('runtime') === -1) : [];
+    const totalAssets = {
+        [ENTRYKEY]: {
+            js: entryAssets.filter(filterJs).map(addPublicPath),
+            css: entryAssets.filter(filterCss).map(addPublicPath)
         }
-        const sname = name ? name : names[0];
-        if (!sname) {
-            return nhash;
+    };
+    Object.keys(namedChunkGroups).forEach((item) => {
+        let { assets } = namedChunkGroups[item];
+        if (!Array.isArray(assets)) {
+            return;
         }
-        const findCssFile = arrayFind(files, file => strEndswith(file, '.css'));
-        if (findCssFile) {
-            nhash.css[sname] = `${publicPath}${findCssFile}`;
+        // 去除已在 entry 中的资源
+        assets = assets.filter(res => entryAssets.indexOf(res) === -1);
+        const jsAssets = assets.filter(filterJs).map(addPublicPath);
+        const cssAssets = assets.filter(filterCss).map(addPublicPath);
+        if (jsAssets.length || cssAssets.length) {
+            totalAssets[item] = {};
+            totalAssets[item].js = jsAssets;
+            totalAssets[item].css = cssAssets;
         }
-        const findJsFile = arrayFind(files, file => strEndswith(file, '.js'));
-        if (findJsFile) {
-            nhash.js[sname] = `${publicPath}${findJsFile}`;
-        }
-        return nhash;
-    }, { js: {}, css: {}});
+    });
+    return totalAssets;
 };
 export default createAssets;
