@@ -3,7 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
 const args = require('yargs').argv;
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const ExtractCssChunks = require('extract-css-chunks-webpack-plugin');
+const AutoPrefixer = require('autoprefixer');
 
 const env = args.env;
 const isDeploy = env === 'production';
@@ -39,7 +40,7 @@ const config = {
                         presets: [
                             ['env', {
                                 targets: {
-                                    browsers: ['IOS >= 7.0', 'Android >= 4.0']
+                                    browsers: ['IOS >= 8.0', 'Android >= 4.4']
                                 },
                                 modules: 'commonjs',
                                 debug: true,
@@ -50,8 +51,7 @@ const config = {
                         ],
                         plugins: [
                             'syntax-dynamic-import',
-                            'asyncmodule-import',
-                            'react-hot-loader/babel'
+                            'asyncmodule-import'
                         ],
                         cacheDirectory: true
                     }
@@ -59,27 +59,21 @@ const config = {
             },
             {
                 test: /\.(css|less)?$/,
-                use: ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: [
-                        {
-                            loader: 'css-loader'
-                        },
-                        {
-                            loader: 'postcss-loader',
-                            options: {
-                                plugins: [
-                                    require('autoprefixer')({
-                                        browsers: ['IOS >= 7.0', 'Android >= 4.0']
-                                    })
-                                ]
-                            }
-                        },
-                        {
-                            loader: 'less-loader'
+                use: [
+                    ExtractCssChunks.loader,
+                    {
+                        loader: 'css-loader'
+                    },
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: [ AutoPrefixer ]
                         }
-                    ]
-                })
+                    },
+                    {
+                        loader: 'less-loader',
+                    }
+                ]
             },
             {
                 test: /\.(png|jpg|gif|svg|cur)?$/,
@@ -96,24 +90,22 @@ const config = {
     devtool: isDeploy ? false : 'inline-source-map'
 };
 if (isDeploy) {
+    config.mode = 'production';
+    config.output.filename = '[name].[chunkhash:8].js';
+    config.output.chunkFilename = '[name].[chunkhash:8].js';
     config.plugins = [
-        new webpack.DefinePlugin({
-            'process.env': {
-                NODE_ENV: JSON.stringify(env)
-            }
-        }),
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.NoEmitOnErrorsPlugin(),
-        new ExtractTextPlugin({
-            filename: '[name].css',
-            allChunks: true
+        new ExtractCssChunks({
+            filename: '[name].[contenthash:8].css',
+            chunkFilename: '[name].[contenthash:8].css'
         })
     ];
 } else {
+    config.mode = 'development';
     config.plugins = [
-        new ExtractTextPlugin({
+        new webpack.HotModuleReplacementPlugin(),
+        new ExtractCssChunks({
             filename: '[name].css',
-            allChunks: true
+            chunkFilename: '[name].css'
         })
     ];
 }
