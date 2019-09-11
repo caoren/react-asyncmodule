@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { BrowserRouter, Route } from 'react-router-dom'; // eslint-disable-line
-import { hot } from 'react-hot-loader/root'; // eslint-disable-line
+import { hot } from 'react-hot-loader'; // eslint-disable-line
 import AsyncModule from '../src/index';
 
 const Loading = (<div className="f-fullhg"><div className="m-loading">加载中...</div></div>);
@@ -16,7 +16,6 @@ const AsyncComponent = AsyncModule({
 
 const Home = AsyncComponent(import(/* webpackChunkName: "home" */ './views/home'));
 const List = AsyncComponent(import(/* webpackChunkName: "list" */ './views/list'));
-Home.preload();
 
 class App extends Component {
     constructor(props) {
@@ -26,11 +25,11 @@ class App extends Component {
         return (
             <BrowserRouter>
                 <div>
-                    <Route exact path="/" component={Home} />
                     <Route exact path="/list" component={List} />
+                    <Route exact path="/" component={Home} />
                 </div>
             </BrowserRouter>
         );
     }
 }
-export default hot(App);
+export default hot(module)(App);
