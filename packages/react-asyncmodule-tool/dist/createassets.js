@@ -4,77 +4,56 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _helper = require('./helper');
 
-var isArray = function isArray(arr) {
-    if ((typeof arr === 'undefined' ? 'undefined' : _typeof(arr)) !== 'object') {
-        return false;
-    }
-    return arr instanceof Array;
-};
-var arrayFind = function arrayFind(arr, func) {
-    if (!isArray(arr)) {
-        return undefined;
-    }
-    var len = arr.length;
-    var res = void 0;
-    for (var i = 0; i < len; i += 1) {
-        if (func(arr[i], i, arr)) {
-            res = arr[i];
-            break;
-        }
-    }
-    return res;
-};
-var strEndswith = function strEndswith() {
-    var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-    var key = arguments[1];
-    var len = arguments[2];
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; } /*
+                                                                                                                                                                                                                   * stats 为 webpack 的 Compiler.hooks.done 回调中传入
+                                                                                                                                                                                                                   * entrypoints 对应 entry
+                                                                                                                                                                                                                   * nameChunksGroups 对应所有的chunk
+                                                                                                                                                                                                                   * publicPath 对应 webpack 的 output 配置下的publicPath
+                                                                                                                                                                                                                   */
 
-    var slen = len;
-    if (len === undefined || len > str.length) {
-        slen = str.length;
-    }
-    return str.substring(slen - key.length, len) === key;
-};
-/*
- * fetch css chunks
- * compilation's chunks and Stats's chunks is diff
- * compilation is `name`
- * Stats is `names`
- */
+
 var createAssets = function createAssets() {
-    var chunks = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-    var publicPath = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+    var stats = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var entrypoints = stats.entrypoints,
+        _stats$namedChunkGrou = stats.namedChunkGroups,
+        namedChunkGroups = _stats$namedChunkGrou === undefined ? {} : _stats$namedChunkGrou,
+        publicPath = stats.publicPath;
+    // 拼接完整url
 
-    return chunks.reduce(function (hash, _ref) {
-        var name = _ref.name,
-            _ref$names = _ref.names,
-            names = _ref$names === undefined ? [] : _ref$names,
-            files = _ref.files;
+    var addPublicPath = function addPublicPath(item) {
+        return '' + publicPath + item;
+    };
+    var entryKey = entrypoints ? Object.keys(entrypoints)[0] : '@NOTFOUND';
+    var entryChunks = namedChunkGroups[entryKey];
+    // 去除runtime(runtime建议内联到html中)
+    var entryAssets = entryChunks ? entryChunks.assets.filter(function (item) {
+        return item.indexOf('runtime') === -1;
+    }) : [];
+    var totalAssets = _defineProperty({}, _helper.ENTRYKEY, {
+        js: entryAssets.filter(_helper.filterJs).map(addPublicPath),
+        css: entryAssets.filter(_helper.filterCss).map(addPublicPath)
+    });
+    Object.keys(namedChunkGroups).forEach(function (item) {
+        var assets = namedChunkGroups[item].assets;
 
-        var nhash = hash;
-        if (!isArray(files)) {
-            return nhash;
+        if (!Array.isArray(assets)) {
+            return;
         }
-        var sname = name ? name : names[0];
-        if (!sname) {
-            return nhash;
-        }
-        var findCssFile = arrayFind(files, function (file) {
-            return strEndswith(file, '.css');
+        // 去除已在 entry 中的资源
+        assets = assets.filter(function (res) {
+            return entryAssets.indexOf(res) === -1;
         });
-        if (findCssFile) {
-            nhash.css[sname] = '' + publicPath + findCssFile;
+        var jsAssets = assets.filter(_helper.filterJs).map(addPublicPath);
+        var cssAssets = assets.filter(_helper.filterCss).map(addPublicPath);
+        if (jsAssets.length || cssAssets.length) {
+            totalAssets[item] = {};
+            totalAssets[item].js = jsAssets;
+            totalAssets[item].css = cssAssets;
         }
-        var findJsFile = arrayFind(files, function (file) {
-            return strEndswith(file, '.js');
-        });
-        if (findJsFile) {
-            nhash.js[sname] = '' + publicPath + findJsFile;
-        }
-        return nhash;
-    }, { js: {}, css: {} });
+    });
+    return totalAssets;
 };
 exports.default = createAssets;
 module.exports = exports['default'];

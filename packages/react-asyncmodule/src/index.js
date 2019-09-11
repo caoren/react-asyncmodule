@@ -101,15 +101,18 @@ const Dueimport = (option = {}) => {
                 onModuleLoaded(comp, chunkName, isServer());
             }
         }
+
         changeState(state = {}) {
             if (this.unmount) {
                 return false;
             }
             return this.setState(state);
         }
+
         retry() {
             this.loadComp();
         }
+
         clearTime() {
             if (this.delayTime) {
                 clearTimeout(this.delayTime);
@@ -120,6 +123,7 @@ const Dueimport = (option = {}) => {
                 delete this.timeoutTime;
             }
         }
+
         loadComp() {
             if (isDelay) {
                 this.delayTime = setTimeout(() => {
@@ -156,9 +160,11 @@ const Dueimport = (option = {}) => {
                 });
             });
         }
+
         componentWillUnmount() {
             this.unmount = true;
         }
+
         render() {
             const {
                 request,
@@ -187,6 +193,7 @@ const Dueimport = (option = {}) => {
     }
     return withConsumer(AsyncComponent);
 };
+
 const Asyncimport = (initOptions = {}) => {
     const mergeOption = shallowCopy({}, DEFAULTOPTIONS, initOptions);
     // `load` exist
@@ -198,4 +205,5 @@ const Asyncimport = (initOptions = {}) => {
         return Dueimport(afterOption);
     };
 };
+
 export default Asyncimport;

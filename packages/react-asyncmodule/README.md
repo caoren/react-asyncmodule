@@ -67,7 +67,7 @@ const List = AsyncComponent(import('./list'));
 
 ### preload
 
-预加载方法，返回一个 promise 实例，可在回调中获取到当前组件。
+预加载方法，返回一个 promise 实例，可在回调中获取到当前组件。a
 
 ### preloadWeak
 
@@ -129,5 +129,3 @@ module加载完执行，返回3个参数
 * isServer, 当前是否为 node 端
 
 `onModuleLoaded(comp, chunkName, isServer)`
-
-
