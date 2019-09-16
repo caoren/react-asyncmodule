@@ -50,3 +50,7 @@ export const Cx = AsyncImport({
 });
 
 const Homex = rand_Component(import(/*webpackChunkName: "arandomname"*/'./views/homex'));
+const Homexx = rand_Component(import(/* webpackPrefetch: true */'./views/homexx'));
+const Homexxx = rand_Component(import(/*webpackChunkName: "arandomnamexx"*/ /* webpackPrefetch: true */'./views/homexx'));
+
+

@@ -17,6 +17,13 @@ exports.default = function (_ref) {
                 type: "CommentBlock",
                 value: 'webpackChunkName: "' + moduleName + '"'
             }];
+        } else if (!module.leadingComments.filter(function (cmt) {
+            return cmt.value.indexOf('webpackChunkName') !== -1;
+        }).length) {
+            module.leadingComments.push({
+                type: "CommentBlock",
+                value: 'webpackChunkName: "' + moduleName + '"'
+            });
         }
         return {
             modulePath: modulePath,
@@ -24,13 +31,8 @@ exports.default = function (_ref) {
         };
     };
 
-    var buildLoad = function buildLoad(importPath, moduleName, importCss) {
-        var loadMaterials = [importPath.node];
-
-        if (importCss) {
-            loadMaterials.push(t.callExpression(t.identifier('ImportCss'), [t.stringLiteral(moduleName)]));
-        }
-        return t.objectProperty(t.identifier('load'), t.arrowFunctionExpression([], t.callExpression(t.memberExpression(t.callExpression(t.memberExpression(t.identifier('Promise'), t.identifier('all')), [t.arrayExpression(loadMaterials)]), t.identifier('then')), [t.arrowFunctionExpression([t.identifier('jsprim')], t.memberExpression(t.identifier('jsprim'), t.NumericLiteral(0), true))])));
+    var buildLoad = function buildLoad(importPath, moduleName) {
+        return t.objectProperty(t.identifier('load'), t.arrowFunctionExpression([], importPath.node));
     };
 
     var buildResolveWeak = function buildResolveWeak(modulePath) {
@@ -46,21 +48,9 @@ exports.default = function (_ref) {
         });
     };
 
-    var handleImportCss = function handleImportCss(path, importCss) {
-        if (importCss) {
-            var declaration = t.importDeclaration([t.importDefaultSpecifier(t.identifier('ImportCss'))], t.stringLiteral('react-asyncmodule-tool/dist/importcss'));
-            var programPath = getProgramPath(path);
-            if (!programPath.scope.existedImportCss) {
-                programPath.unshiftContainer('body', declaration);
-                programPath.scope.existedImportCss = true;
-            }
-        }
-    };
+    var astParser = function astParser(path) {
+        var returnImport = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
 
-    var astParser = function astParser(path, importCss) {
-        var returnImport = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
-
-        handleImportCss(path, importCss);
         // add leadingComments to the import argument module
         var nodeType = path.node.type;
 
@@ -84,7 +74,7 @@ exports.default = function (_ref) {
             modulePath = _addComments.modulePath,
             moduleName = _addComments.moduleName;
 
-        var load = buildLoad(importPath, moduleName, importCss);
+        var load = buildLoad(importPath, moduleName);
         var resolveWeak = buildResolveWeak(modulePath);
         var chunkNameCmt = module.leadingComments.find(function (cmt) {
             return cmt.value.includes('webpackChunkName');
@@ -110,38 +100,30 @@ exports.default = function (_ref) {
     };
     return {
         visitor: {
-            ImportDeclaration: function ImportDeclaration(path) {
-                var node = path.node;
-
-                var programPath = getProgramPath(path);
-                if (node.specifiers.length && node.specifiers[0].local.name === 'ImportCss') {
-                    programPath.scope.existedImportCss = true;
-                }
-            },
             CallExpression: function CallExpression(path, _ref2) {
                 var opts = _ref2.opts;
                 var node = path.node;
 
-                var importCss = opts && opts.importCss || false;
-
-                if (t.isCallExpression(node.arguments[0]) && t.isImport(node.arguments[0].callee)) {
-                    astParser(path, importCss);
+                if (t.isCallExpression(node.arguments[0]) && t.isImport(node.arguments[0].callee) && node.callee.name !== 'Promise') {
+                    astParser(path);
                 }
             },
             ObjectProperty: function ObjectProperty(path, _ref3) {
                 var opts = _ref3.opts;
                 var node = path.node;
 
-                var importCss = opts && opts.importCss || false;
                 var returnImport = undefined;
                 if (node.key.name === 'load' && t.isArrowFunctionExpression(node.value)) {
-                    if (node.value.body && t.isCallExpression(node.value.body) && t.isImport(node.value.body.callee)) {
+                    var alreadyCmted = node.value.body.arguments && node.value.body.arguments[0].leadingComments && node.value.body.arguments[0].leadingComments.some(function (cmt) {
+                        return cmt.value.indexOf('webpackChunkName') !== -1;
+                    });
+                    if (node.value.body && t.isCallExpression(node.value.body) && t.isImport(node.value.body.callee) && !alreadyCmted) {
                         returnImport = false;
                     } else if (node.value.body && t.isBlockStatement(node.value.body) && t.isReturnStatement(node.value.body.body[0]) && t.isCallExpression(node.value.body.body[0].argument) && t.isImport(node.value.body.body[0].argument.callee)) {
                         returnImport = true;
                     }
                     if (returnImport !== undefined) {
-                        astParser(path, importCss, returnImport);
+                        astParser(path, returnImport);
                     }
                 } else {
                     return;
@@ -151,9 +133,8 @@ exports.default = function (_ref) {
                 var opts = _ref4.opts;
                 var node = path.node;
 
-                var importCss = opts && opts.importCss || false;
                 if (node.key.name === 'load' && t.isBlockStatement(node.body) && t.isReturnStatement(node.body.body[0]) && t.isCallExpression(node.body.body[0].argument) && t.isImport(node.body.body[0].argument.callee)) {
-                    astParser(path, importCss);
+                    astParser(path);
                 } else {
                     return;
                 }

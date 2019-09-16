@@ -5,7 +5,7 @@
 
 ## Installation
 
-> npm i babel-plugin-asyncmodule-import
+> npm i -D babel-plugin-asyncmodule-import
 
 ## used in webpack babel-loader
 
@@ -17,19 +17,13 @@
         loader: 'babel-loader',
         options: {
             plugins: [
-                ['asyncmodule-import', { ... }]
+                'asyncmodule-import',
                 ...
             ]
         }
     }]
 }
 ```
-
-## parammeters
-
-Name             | Type       | Default          | Description
------------------|------------|------------------|--------------
-[importCss]       | `Boolean`   |  `false`  | import `ImportCss` to load css
 
 ## What it does
 
@@ -47,49 +41,25 @@ const Home = AsyncComponent(import('./views/home'));
  ↓ ↓ ↓ ↓ ↓ ↓  
 
 import AsyncModule from 'react-asyncmodule';
-import ImportCss from 'react-asyncmodule-tool/dist/importcss';
 const AsyncComponent = AsyncModule({
     delay: 300,
     ...
 });
 const Home = AsyncComponent({
-    load: () => Promise.all([import( /*webpackChunkName: "home"*/'./views/home'), ImportCss('home')]).then(jsprim => jsprim[0]),
+    load: () => import( /*webpackChunkName: "home"*/'./views/home'),
     resolveWeak: () => require.resolveWeak('./views/home')
 });
 ```
 
 ```javascript
-// when importCss set default false
 import AsyncModule from 'react-asyncmodule';
 const AsyncComponent = AsyncModule({
     delay: 300,
     ...
 });
-const Home = AsyncComponent(import('./views/home'));
-
- ↓ ↓ ↓ ↓ ↓ ↓
- 
-import AsyncModule from 'react-asyncmodule';
-const AsyncComponent = AsyncModule({
-    delay: 300,
-    ...
-});
-const Home = AsyncComponent({
-    load: () => Promise.all([import( /*webpackChunkName: "home"*/'./views/home')]).then(jsprim => jsprim[0]),
-    resolveWeak: () => require.resolveWeak('./views/home')
-});
-```
-
-```javascript
-// when importCss set default false
-import AsyncModule from 'react-asyncmodule';
-const AsyncComponent = AsyncModule({
-    delay: 300,
-    ...
-});
-// arrow function
+// arrow function & magic comment compatibility
 const A = AsyncModule({
-    load: () => import('./a'),
+    load: () => import( /* webpackPrefetch: true */'./a'),
     loading: 'LoadingView',
     error: 'ErrorView',
 });
@@ -119,7 +89,7 @@ const AsyncComponent = AsyncModule({
 });
 
 const A = AsyncModule({
-    load: () => Promise.all([import( /*webpackChunkName: "a"*/'./a')]).then(jsprim => jsprim[0]),
+    load: () => import( /* webpackPrefetch: true */ /*webpackChunkName: "a"*/ './a')]),
     resolveWeak: () => require.resolveWeak('./a'),
     chunk: () => 'a',
     loading: 'LoadingView',
@@ -127,7 +97,7 @@ const A = AsyncModule({
 });
 
 const B = AsyncModule({
-    load: () => Promise.all([import( /*webpackChunkName: "b"*/'./b')]).then(jsprim => jsprim[0]),
+    load: () => import( /*webpackChunkName: "b"*/'./b'),
     resolveWeak: () => require.resolveWeak('./b'),
     chunk: () => 'b',
     loading: 'LoadingView',
@@ -135,7 +105,7 @@ const B = AsyncModule({
 });
 
 const C = AsyncModule({
-    load: () => Promise.all([import( /*webpackChunkName: "c"*/'./c')]).then(jsprim => jsprim[0]),
+    load: () => import( /*webpackChunkName: "c"*/'./c'),
     resolveWeak: () => require.resolveWeak('./c'),
     chunk: () => 'c',
     loading: 'LoadingView',
