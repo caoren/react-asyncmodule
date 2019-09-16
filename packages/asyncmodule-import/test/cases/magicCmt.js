@@ -1,0 +1,1 @@
+const Homex = rand_Component(import( /* webpackPrefetch: true */'./views/homex'));

@@ -18,22 +18,13 @@ describe('asyncmodule import', function() {
         const { code: expectCode } = babel.transformFileSync(path.join(__dirname, 'cases/common_res.js'));
         expect(srcCode).toBe(expectCode);
     });
-    test('importCss', function() {
-        const { code: srcCode } = babel.transformFileSync(path.join(__dirname, 'cases/importCss.js'), {
+    test('magicCmt', function() {
+        const { code: srcCode } = babel.transformFileSync(path.join(__dirname, 'cases/magicCmt.js'), {
             plugins: ['syntax-dynamic-import',[asyncModuleImport, {
                 importCss: true
             }]]
         });
-        const { code: expectCode } = babel.transformFileSync(path.join(__dirname, 'cases/importCss_res.js'));
-        expect(srcCode).toBe(expectCode);
-    });
-    test('simplifyImportCss', function() {
-        const { code: srcCode } = babel.transformFileSync(path.join(__dirname, 'cases/simplifyImportCss.js'), {
-            plugins: ['syntax-dynamic-import', [asyncModuleImport, {
-                importCss: true
-            }]]
-        });
-        const { code: expectCode } = babel.transformFileSync(path.join(__dirname, 'cases/simplifyImportCss_res.js'));
+        const { code: expectCode } = babel.transformFileSync(path.join(__dirname, 'cases/magicCmt_res.js'));
         expect(srcCode).toBe(expectCode);
     });
     test('defaultcomment', function() {
