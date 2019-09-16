@@ -3,8 +3,7 @@
     "commonjs": {
       "presets": [
         ["env", {
-          modules : "commonjs",
-          useBuiltIns: true
+          modules : "commonjs"
         }],
         "stage-0",
         "react"

@@ -20,10 +20,15 @@ export const shallowCopy = (target, ...args) => {
     }
     return newTarget;
 };
-export const isServer = () => !(
-    typeof window !== 'undefined' &&
-    window.document &&
-    window.document.createElement
+let testServer = false;
+// only use test
+export const setTestServer = (bool) => {
+    testServer = bool;
+};
+export const isServer = () => testServer || !(
+    typeof window !== 'undefined'
+    && window.document
+    && window.document.createElement
 );
 export const isWebpack = () => typeof __webpack_require__ !== 'undefined'; // eslint-disable-line
 export const getModule = mod => mod && typeof mod === 'object' && mod.__esModule ? mod.default : mod;  // eslint-disable-line
@@ -33,27 +38,19 @@ export const requireById = (id) => {
     }
     return null;
 };
-export const resolving = (load, resolveWeak) => {
+// sync fetch corresponding component
+// webpack if module exist, must find `__webpack_modules__`
+export const syncModule = (resolveWeak, load) => {
     if (!resolveWeak) {
-        return {
-            loaded: false
-        };
+        return null;
     }
     const weakId = resolveWeak();
-    let isloaded = true;
-    // server side `require` is sync
-    if (isServer()) {
+    // `__webpack_modules__` equal to `__webpack_require__.m`
+    if (__webpack_modules__[weakId]) { // eslint-disable-line
+        return requireById(weakId);
+    } else if (load && isServer()) {
         load();
-    } else {
-        // equal to __webpack_require__.m
-        isloaded = !!__webpack_modules__[weakId]; // eslint-disable-line
+        return requireById(weakId);
     }
-    const com = isloaded ? requireById(weakId) : null;
-    if (!com) {
-        isloaded = false;
-    }
-    return {
-        loaded: isloaded,
-        cur: com
-    };
+    return null;
 };

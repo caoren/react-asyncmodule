@@ -7,11 +7,18 @@ class Home extends Component {
     }
     render() {
         return (
-            <div className="m-home">
-                首页<br />
-                <Link to="/list">列表</Link>
-            </div>
+            <React.Fragment>
+                <div className="m-home">
+                    <Link to="/list">列表</Link>
+                </div>
+                <div>
+                    我是首页
+                </div>
+            </React.Fragment>
         );
     }
 }
+Home.fetchData = () => {
+    console.log('=home=');
+};
 export default Home;

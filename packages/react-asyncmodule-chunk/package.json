@@ -1,13 +1,13 @@
 {
-  "name": "react-asyncmodule-tool",
-  "version": "1.0.0",
-  "description": "react asyncmodule tool",
+  "name": "react-asyncmodule-chunk",
+  "version": "1.0.1",
+  "description": "react asyncmodule chunk",
   "author": "caoren",
   "sideEffects": false,
   "keywords": [
     "react",
     "asyncmodule",
-    "tool"
+    "provider"
   ],
   "bugs": {
     "url": "https://github.com/caoren/react-asyncmodule/issues"
@@ -31,9 +31,30 @@
     "babel-loader": "^7.1.2",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-env": "^1.6.0",
+    "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "cross-env": "^5.0.5",
-    "jest": "^23.5.0"
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.13.1",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-react": "^7.4.0",
+    "eslint-loader": "^1.9.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "jest": "^23.5.0",
+    "prop-types": "^15.6.0",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
+  },
+  "peerDependencies": {
+    "prop-types": ">=15.3.0",
+    "react": ">=15.3.0",
+    "react-dom": ">=15.3.0"
+  },
+  "dependencies": {
+    "create-react-context": ">=0.3.0",
+    "hoist-non-react-statics": "^3.3.0"
   },
   "engines": {
     "node": ">= 6.2.0",
@@ -44,8 +65,12 @@
   "jest": {
     "collectCoverage": true,
     "moduleFileExtensions": [
-      "js"
+      "js",
+      "jsx"
     ],
+    "testEnvironmentOptions": {
+      "url": "http://localhost"
+    },
     "testMatch": [
       "<rootDir>/test/*.js?(x)"
     ],

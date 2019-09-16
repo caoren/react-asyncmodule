@@ -1,82 +1,98 @@
 import { createAssets } from '../src/index';
 
+
+const stats = {
+    entrypoints: {
+        app: {
+            chunks: ['commons', 'libs', 'app'],
+            assets: [
+                'commons.css',
+                'commons.js',
+                'commons.css.map',
+                'commons.js.map',
+                'libs.js',
+                'libs.js.map',
+                'app.js',
+                'app.js.map'
+            ]
+        }
+    },
+    namedChunkGroups: {
+        app: {
+            chunks: ['commons', 'libs', 'app'],
+            assets: [
+                'commons.css',
+                'commons.js',
+                'commons.css.map',
+                'commons.js.map',
+                'libs.js',
+                'libs.js.map',
+                'app.js',
+                'app.js.map'
+            ]
+        },
+        a: {
+            chunks: ['commons', 'default', 'a'],
+            assets: [
+                'commons.css',
+                'commons.js',
+                'commons.css.map',
+                'commons.js.map',
+                'default.js',
+                'default.js.map',
+                'a.js',
+                'a.js.map',
+                'a.css',
+                'a.css.map'
+            ]
+        }
+    },
+    publicPath: '//s.iplay.126.net/t/s/'
+}
 describe('createAssets', () => {
     test('default', () => {
         const assets = createAssets();
         expect(assets).toEqual({
-            js: {},
-            css: {}
-        });
-    });
-    test('chunks not contain `name` | `names`', () => {
-        const assets = createAssets([{
-            files: ['a.css', 'a.js']
-        }]);
-        expect(assets).toEqual({
-            js: {},
-            css: {}
+            "@ENTRY": {
+                js: [],
+                css: []
+            }
         });
     });
     test('custom', () => {
-        const assets = createAssets([{
-            name: 'a',
-            files: ['a.css', 'a.js']
-        }, {
-            name: 'b',
-            files: ['b.css', 'b.js']
-        }], '/public/');
+        const assets = createAssets(stats);
         expect(assets).toEqual({
-            js: {
-                a: '/public/a.js',
-                b: '/public/b.js'
+            "@ENTRY": {
+                js: [
+                    '//s.iplay.126.net/t/s/commons.js',
+                    '//s.iplay.126.net/t/s/libs.js',
+                    '//s.iplay.126.net/t/s/app.js',
+                ],
+                css: [ '//s.iplay.126.net/t/s/commons.css' ]
             },
-            css: {
-                a: '/public/a.css',
-                b: '/public/b.css'
+            a: {
+                js: [
+                    '//s.iplay.126.net/t/s/default.js',
+                    '//s.iplay.126.net/t/s/a.js'
+                ],
+                css: [
+                    '//s.iplay.126.net/t/s/a.css'
+                ]
             }
         });
     });
-    test('ignore', () => {
-        const assets = createAssets([{
-            name: 'a',
-            files: ['a.css', 'a.js']
-        }, {
-            name: 'b',
-            files: ['b.css', 'b.js']
-        }, {
-            name: 'c',
-            files: ['c.js.map']
-        }, {
-            name: 'd',
-            files: undefined
-        }], '/public/');
-        expect(assets).toEqual({
-            js: {
-                a: '/public/a.js',
-                b: '/public/b.js'
-            },
-            css: {
-                a: '/public/a.css',
-                b: '/public/b.css'
+    test('assets not array', () => {
+        const assets = createAssets({
+            namedChunkGroups: {
+                'a': {
+                    assets: ''
+                }
             }
         });
-    });
-    test('stats param', () => {
-        const assets = createAssets([{
-            names: ['a'],
-            files: ['a.css', 'a.js']
-        }, {
-            names: ['b'],
-            files: ['b.css', 'b.js']
-        }], '/public/');
         expect(assets).toEqual({
-            js: {
-                a: '/public/a.js',
-                b: '/public/b.js'
-            },
-            css: {
-                a: '/public/a.css',
-                b: '/public/b.css'
+            "@ENTRY": {
+                js: [],
+                css: []
             }
         });
     });
