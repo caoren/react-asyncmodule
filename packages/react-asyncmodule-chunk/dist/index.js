@@ -1,17 +1,17 @@
-'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
 });
 exports.withConsumer = undefined;
 
-var _asyncchunk = require('./asyncchunk');
+const _asyncchunk = require('./asyncchunk');
 
-var _asyncchunk2 = _interopRequireDefault(_asyncchunk);
+const _asyncchunk2 = _interopRequireDefault(_asyncchunk);
 
-var _asynccontext = require('./asynccontext');
+const _asynccontext = require('./asynccontext');
 
-var _asynccontext2 = _interopRequireDefault(_asynccontext);
+const _asynccontext2 = _interopRequireDefault(_asynccontext);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 

@@ -12,6 +12,7 @@ Es6 used.
 
 ```javascript
 import {
+    createCollect,
     createAssets,
     getChunkAssets
 } from 'react-asyncmodule-tool';
@@ -19,6 +20,30 @@ import {
 
 
 ## API
+
+### createCollect(options)
+
+options的属性
+
+| Name           | Type       | Default | Description         |
+| -------------- | ---------- | ------- | ------------------- |
+| chunkName      | `string` or `array` | -  | 必填，当前 chunk 的名称，根据该值获取对应的资源文件  |
+| stats          | `object`         | -   | 必填，webpack 构建生成的 stats  |
+| entrypoints    | `string` or `array`   |  工程的 entry           | 入口文件  |
+| asyncChunkKey  | `string` |     -      |  client 端获取依赖 chunk 的 domid  |
+
+```javascript
+const collect = createCollect({
+    stats,
+    chunkName: 'home'
+});
+
+collect.getScripts(); // 返回 chunk 所需的脚本，含 async
+collect.getStyles(); // 返回 chunk 所需的样式
+collect.getInlineStyles().then((data) => { // 返回内联的样式
+    console.log(data);
+});
+```
 
 ### createAssets(chunks, publicPath)
 

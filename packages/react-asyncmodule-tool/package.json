@@ -52,5 +52,8 @@
     "transform": {
       "^.+\\.js$": "babel-jest"
     }
+  },
+  "dependencies": {
+    "react-asyncmodule": "^1.0.0"
   }
 }

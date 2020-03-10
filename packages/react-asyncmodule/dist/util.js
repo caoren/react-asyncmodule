@@ -1,25 +1,30 @@
-'use strict';
 
-Object.defineProperty(exports, "__esModule", {
+
+Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+const _typeof = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol' ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === 'function' && obj.constructor === Symbol && obj !== Symbol.prototype ? 'symbol' : typeof obj; };
 
 // utils
-var shallowCopy = exports.shallowCopy = function shallowCopy(target) {
+const ASYNC_MODULE_CHUNKS = exports.ASYNC_MODULE_CHUNKS = '__ASYNC_MODULE_CHUNKS__';
+const getAsyncChunkKey = exports.getAsyncChunkKey = function getAsyncChunkKey(key) {
+    return key || ASYNC_MODULE_CHUNKS;
+};
+
+const shallowCopy = exports.shallowCopy = function shallowCopy(target) {
     if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== 'object') {
         return target;
     }
-    var newTarget = target;
-    var len = arguments.length <= 1 ? 0 : arguments.length - 1;
+    const newTarget = target;
+    const len = arguments.length <= 1 ? 0 : arguments.length - 1;
     if (len <= 0) {
         return newTarget;
     }
-    for (var i = 0; i < len; i += 1) {
-        var cur = arguments.length <= i + 1 ? undefined : arguments[i + 1];
+    for (let i = 0; i < len; i += 1) {
+        const cur = arguments.length <= i + 1 ? undefined : arguments[i + 1];
         if (cur != null) {
-            for (var k in cur) {
+            for (const k in cur) {
                 // eslint-disable-line
                 if (Object.prototype.hasOwnProperty.call(cur, k)) {
                     newTarget[k] = cur[k];
@@ -29,21 +34,21 @@ var shallowCopy = exports.shallowCopy = function shallowCopy(target) {
     }
     return newTarget;
 };
-var testServer = false;
+let testServer = false;
 // only use test
-var setTestServer = exports.setTestServer = function setTestServer(bool) {
+const setTestServer = exports.setTestServer = function setTestServer(bool) {
     testServer = bool;
 };
-var isServer = exports.isServer = function isServer() {
+const isServer = exports.isServer = function isServer() {
     return testServer || !(typeof window !== 'undefined' && window.document && window.document.createElement);
 };
-var isWebpack = exports.isWebpack = function isWebpack() {
+const isWebpack = exports.isWebpack = function isWebpack() {
     return typeof __webpack_require__ !== 'undefined';
 }; // eslint-disable-line
-var getModule = exports.getModule = function getModule(mod) {
+const getModule = exports.getModule = function getModule(mod) {
     return mod && (typeof mod === 'undefined' ? 'undefined' : _typeof(mod)) === 'object' && mod.__esModule ? mod.default : mod;
 }; // eslint-disable-line
-var requireById = exports.requireById = function requireById(id) {
+const requireById = exports.requireById = function requireById(id) {
     if (isWebpack()) {
         return getModule(__webpack_require__(id)); // eslint-disable-line
     }
@@ -51,16 +56,16 @@ var requireById = exports.requireById = function requireById(id) {
 };
 // sync fetch corresponding component
 // webpack if module exist, must find `__webpack_modules__`
-var syncModule = exports.syncModule = function syncModule(resolveWeak, load) {
+const syncModule = exports.syncModule = function syncModule(resolveWeak, load) {
     if (!resolveWeak) {
         return null;
     }
-    var weakId = resolveWeak();
+    const weakId = resolveWeak();
     // `__webpack_modules__` equal to `__webpack_require__.m`
     if (__webpack_modules__[weakId]) {
         // eslint-disable-line
         return requireById(weakId);
-    } else if (load && isServer()) {
+    } if (load && isServer()) {
         load();
         return requireById(weakId);
     }

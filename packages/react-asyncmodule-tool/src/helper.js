@@ -16,7 +16,32 @@ export const filterJs = filterAssets('.js');
 export const filterCss = filterAssets('.css');
 
 // 生成完整的 script 格式
-export const mapScript = item => `<script type="text/javascript" src="${item}"></script>`;
+export const mapScript = (item, isAsync = false) => {
+    const asyncAttribute = typeof isAsync === 'boolean' && isAsync ? ' async ' : ' ';
+    return `<script type="text/javascript"${asyncAttribute}src="${item}"></script>`;
+}
+
+// 生成完成的 style
+export const mapStyle = (item, url) => `<style data-href="${url}" type="text/css">${item}</style>`;
 
 // 生成完整的 link 格式
 export const mapLink = item => `<link href="${item}" rel="stylesheet">`;
+
+// 去除数组的重复数据，未考虑数字和字符串的差别，故只适用于该场景
+export const uniq = (arr) => {
+    const obj = {};
+    const narr = [];
+    arr.forEach((item) => {
+        if (!obj[item]) {
+            narr.push(item);
+            obj[item] = 1;
+        }
+    });
+    return narr;
+}
+
+// 合并2个路径
+export const joinPath = (path, filename) => {
+    const gap = path.slice(-1) === '/' ? '' : '/';
+    return `${path}${gap}${filename}`;
+}

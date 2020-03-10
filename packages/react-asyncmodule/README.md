@@ -73,6 +73,17 @@ const List = AsyncComponent(import('./list'));
 
 预加载方法，不同于 `preload`，该方法是同步返回当前的组件，通常用于 server render。
 
+## asyncReady
+
+```javascript
+import { asyncReady } from 'react-asyncmodule';
+
+asyncReady(() => {
+    // 依赖的 chunk 准备就绪，再进行注水，防止因 chunk 还未加载完成和 server 端渲染不一致
+    ReactDOM.hydrate();
+});
+```
+
 ## API
 
 ```javascript
