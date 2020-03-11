@@ -1,6 +1,6 @@
 {
   "name": "react-asyncmodule-tool",
-  "version": "1.0.0",
+  "version": "1.1.0-alpha.0",
   "description": "react asyncmodule tool",
   "author": "caoren",
   "sideEffects": false,
@@ -54,6 +54,6 @@
     }
   },
   "dependencies": {
-    "react-asyncmodule": "^1.0.0"
+    "react-asyncmodule": "^1.1.0-alpha.0"
   }
 }
