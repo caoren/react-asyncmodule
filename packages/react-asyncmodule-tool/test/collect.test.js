@@ -88,7 +88,7 @@ describe('createCollect', () => {
             stats,
             chunkName: 'a'
         });
-        expect(res.getScripts()).toBe('<script id=\"__ASYNC_MODULE_CHUNKS__\" type=\"application/json\">[\"commons\",\"default\",\"a\"]</script><script type=\"text/javascript\" async src=\"//s.iplay.126.net/t/s/commons.js\"></script><script type=\"text/javascript\" async src=\"//s.iplay.126.net/t/s/libs.js\"></script><script type=\"text/javascript\" async src=\"//s.iplay.126.net/t/s/app.js\"></script><script type=\"text/javascript\" async src=\"//s.iplay.126.net/t/s/default.js\"></script><script type=\"text/javascript\" async src=\"//s.iplay.126.net/t/s/a.js\"></script>');
+        expect(res.getScripts()).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">["commons","libs","default","a"]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/commons.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/libs.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/default.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/a.js"></script>');
         expect(res.getStyles()).toBe('<link href="//s.iplay.126.net/t/s/commons.css" rel="stylesheet"><link href="//s.iplay.126.net/t/s/a.css" rel="stylesheet">');
     });
 
@@ -119,5 +119,74 @@ describe('createCollect', () => {
         }).catch((err) => {
             expect(err.message).toMatch(/\/b.css/);
         });
+    });
+});
+
+const stats3 = {
+    entrypoints: {
+        app: {
+            chunks: [1, 3 , 2],
+            assets: [
+                'commons.css',
+                'commons.js',
+                'commons.css.map',
+                'commons.js.map',
+                'runtimea.js',
+                'runtimea.js.map',
+                'app.js',
+                'app.js.map'
+            ]
+        }
+    },
+    namedChunkGroups: {
+        app: {
+            chunks: [1, 3, 2],
+            assets: [
+                'commons.css',
+                'commons.js',
+                'commons.css.map',
+                'commons.js.map',
+                'runtimea.js',
+                'runtimea.js.map',
+                'app.js',
+                'app.js.map'
+            ]
+        },
+        a: {
+            chunks: [1, 4, 5],
+            assets: [
+                'commons.css',
+                'commons.js',
+                'commons.css.map',
+                'commons.js.map',
+                'default.js',
+                'default.js.map',
+                'a.js',
+                'a.js.map',
+                'a.css',
+                'a.css.map'
+            ]
+        }
+    },
+    publicPath: '//s.iplay.126.net/t/s/',
+    outputPath: path.resolve(__dirname, './css/')
+}
+describe('runtimeName', () => {
+    test('change', () => {
+        const res = createCollect({
+            stats: stats3,
+            chunkName: 'a',
+            runtimeName: 'runtimea'
+        });
+        expect(res.getScripts()).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">[1,4,5]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/commons.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/default.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/a.js"></script>');
+    });
+
+    test('change', () => {
+        const res = createCollect({
+            stats: stats3,
+            chunkName: 'a',
+            runtimeName: ['runtimea']
+        });
+        expect(res.getScripts({ hasRuntime: true })).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">[1,4,5]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/commons.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/runtimea.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/default.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/a.js"></script>');
     });
 });

@@ -1,42 +1,36 @@
+'use strict';
 
-
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-const _createClass = (function () { function defineProperties(target, props) { for (let i = 0; i < props.length; i++) { const descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }());
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-const _react = require('react');
+var _react = require('react');
 
-const _react2 = _interopRequireDefault(_react);
+var _react2 = _interopRequireDefault(_react);
 
-const _hoistNonReactStatics = require('hoist-non-react-statics');
+var _hoistNonReactStatics = require('hoist-non-react-statics');
 
-const _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
+var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 
-const _reactAsyncmoduleChunk = require('react-asyncmodule-chunk');
+var _reactAsyncmoduleChunk = require('react-asyncmodule-chunk');
 
-const _util = require('./util');
+var _util = require('./util');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _objectWithoutProperties(obj, keys) { const target = {}; for (const i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === 'object' || typeof call === 'function') ? call : self; }
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) {
-    if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError(`Super expression must either be null or a function, not ${typeof superClass}`); } subClass.prototype = Object.create(superClass && superClass.prototype, {
-        constructor: {
-            value: subClass, enumerable: false, writable: true, configurable: true
-        }
-    }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-}
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-const TIMEOUT = 120000;
-const DELAY = 200;
-const packComponent = function packComponent(comp) {
+var TIMEOUT = 120000;
+var DELAY = 200;
+var packComponent = function packComponent(comp) {
     return function (props) {
         if (!comp) {
             return null;
@@ -48,9 +42,9 @@ const packComponent = function packComponent(comp) {
         return _react2.default.createElement(comp, props);
     };
 };
-const customData = function customData() {
-    const data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    const chunkName = arguments[1];
+var customData = function customData() {
+    var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var chunkName = arguments[1];
     return data[chunkName];
 };
 
@@ -64,7 +58,7 @@ const customData = function customData() {
  * @delay `number` ms, loading view delay display
  * @timeout `number` ms, load timeout time
  */
-const DEFAULTOPTIONS = {
+var DEFAULTOPTIONS = {
     load: null,
     render: null,
     resolveWeak: null,
@@ -74,38 +68,38 @@ const DEFAULTOPTIONS = {
     timeout: TIMEOUT,
     onModuleLoaded: null
 };
-const Dueimport = function Dueimport() {
-    const option = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    const { load } = option;
-    const _render = option.render;
-    const { loading } = option;
-    const { error } = option;
-    const { delay } = option;
-    const { timeout } = option;
-    const { resolveWeak } = option;
-    const { chunk } = option;
-    const { onModuleLoaded } = option;
+var Dueimport = function Dueimport() {
+    var option = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var load = option.load,
+        _render = option.render,
+        loading = option.loading,
+        error = option.error,
+        delay = option.delay,
+        timeout = option.timeout,
+        resolveWeak = option.resolveWeak,
+        chunk = option.chunk,
+        onModuleLoaded = option.onModuleLoaded;
 
     if (!load) {
         return null;
     }
-    const isHasRender = typeof _render === 'function';
-    const chunkName = typeof chunk === 'function' ? chunk() : '';
+    var isHasRender = typeof _render === 'function';
+    var chunkName = typeof chunk === 'function' ? chunk() : '';
     // The first letter of the react component
     // name is uppercase
-    const LoadingView = packComponent(loading);
-    const ErrorView = packComponent(error);
-    const isDelay = typeof delay === 'number' && delay !== 0;
-    const isTimeout = typeof timeout === 'number' && timeout !== 0;
+    var LoadingView = packComponent(loading);
+    var ErrorView = packComponent(error);
+    var isDelay = typeof delay === 'number' && delay !== 0;
+    var isTimeout = typeof timeout === 'number' && timeout !== 0;
 
-    const AsyncComponent = (function (_Component) {
+    var AsyncComponent = function (_Component) {
         _inherits(AsyncComponent, _Component);
 
         _createClass(AsyncComponent, null, [{
             key: 'preload',
             value: function preload() {
-                const comp = (0, _util.syncModule)(resolveWeak);
-                return Promise.resolve().then(() => {
+                var comp = (0, _util.syncModule)(resolveWeak);
+                return Promise.resolve().then(function () {
                     if (comp) {
                         return comp;
                     }
@@ -122,20 +116,20 @@ const Dueimport = function Dueimport() {
         function AsyncComponent(props) {
             _classCallCheck(this, AsyncComponent);
 
-            const _this = _possibleConstructorReturn(this, (AsyncComponent.__proto__ || Object.getPrototypeOf(AsyncComponent)).call(this, props));
+            var _this = _possibleConstructorReturn(this, (AsyncComponent.__proto__ || Object.getPrototypeOf(AsyncComponent)).call(this, props));
 
             _this.unmount = false;
-            const { report } = props;
+            var report = props.report;
 
-            const comp = (0, _util.syncModule)(resolveWeak, load);
+            var comp = (0, _util.syncModule)(resolveWeak, load);
             if (report && comp) {
-                const exportStatic = {};
+                var exportStatic = {};
                 (0, _hoistNonReactStatics2.default)(exportStatic, comp);
                 exportStatic.chunkName = chunkName;
                 report(exportStatic);
             }
             _this.state = {
-                comp,
+                comp: comp,
                 err: '',
                 request: !isDelay
             };
@@ -152,7 +146,7 @@ const Dueimport = function Dueimport() {
         _createClass(AsyncComponent, [{
             key: 'changeState',
             value: function changeState() {
-                const state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+                var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
                 if (this.unmount) {
                     return false;
@@ -179,17 +173,17 @@ const Dueimport = function Dueimport() {
         }, {
             key: 'loadComp',
             value: function loadComp() {
-                const _this2 = this;
+                var _this2 = this;
 
                 if (isDelay) {
-                    this.delayTime = setTimeout(() => {
+                    this.delayTime = setTimeout(function () {
                         _this2.changeState({
                             request: true
                         });
                     }, delay);
                 }
                 if (isTimeout) {
-                    this.timeoutTime = setTimeout(() => {
+                    this.timeoutTime = setTimeout(function () {
                         _this2.clearTime();
                         _this2.changeState({
                             request: false,
@@ -197,18 +191,18 @@ const Dueimport = function Dueimport() {
                         });
                     }, timeout);
                 }
-                load().then((component) => {
+                load().then(function (component) {
                     _this2.clearTime();
-                    const comp = (0, _util.getModule)(component);
+                    var comp = (0, _util.getModule)(component);
                     _this2.changeState({
-                        comp,
+                        comp: comp,
                         request: false,
                         err: ''
                     });
                     if (onModuleLoaded) {
                         onModuleLoaded(comp, chunkName, false);
                     }
-                }).catch((e) => {
+                }).catch(function (e) {
                     _this2.clearTime();
                     _this2.changeState({
                         request: false,
@@ -224,14 +218,14 @@ const Dueimport = function Dueimport() {
         }, {
             key: 'render',
             value: function render() {
-                const _state = this.state;
-                const { request } = _state;
-                const { err } = _state;
-                const LoadComponent = _state.comp;
+                var _state = this.state,
+                    request = _state.request,
+                    err = _state.err,
+                    LoadComponent = _state.comp;
 
                 if (request) {
                     return LoadingView();
-                } if (err !== '') {
+                } else if (err !== '') {
                     return ErrorView({
                         onRetry: this.retry,
                         error: err
@@ -241,9 +235,9 @@ const Dueimport = function Dueimport() {
                     return null;
                 }
 
-                const _props = this.props;
-                const { report } = _props;
-                const overProps = _objectWithoutProperties(_props, ['report']);
+                var _props = this.props,
+                    report = _props.report,
+                    overProps = _objectWithoutProperties(_props, ['report']);
 
                 if (overProps.receiveData) {
                     overProps.receiveData = customData(overProps.receiveData, chunkName);
@@ -253,28 +247,28 @@ const Dueimport = function Dueimport() {
         }]);
 
         return AsyncComponent;
-    }(_react.Component));
+    }(_react.Component);
 
     AsyncComponent.chunkName = chunkName;
 
     return (0, _reactAsyncmoduleChunk.withConsumer)(AsyncComponent);
 };
 
-const Asyncimport = function Asyncimport() {
-    const initOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+var Asyncimport = function Asyncimport() {
+    var initOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-    const mergeOption = (0, _util.shallowCopy)({}, DEFAULTOPTIONS, initOptions);
+    var mergeOption = (0, _util.shallowCopy)({}, DEFAULTOPTIONS, initOptions);
     // `load` exist
     if (mergeOption.load) {
         return Dueimport(mergeOption);
     }
     return function () {
-        const stepOption = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var stepOption = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-        const afterOption = (0, _util.shallowCopy)({}, mergeOption, stepOption);
+        var afterOption = (0, _util.shallowCopy)({}, mergeOption, stepOption);
         return Dueimport(afterOption);
     };
 };
 
 exports.default = Asyncimport;
-module.exports = exports.default;
+module.exports = exports['default'];

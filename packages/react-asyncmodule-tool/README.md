@@ -31,6 +31,7 @@ options的属性
 | stats          | `object`         | -   | 必填，webpack 构建生成的 stats  |
 | entrypoints    | `string` or `array`   |  工程的 entry           | 入口文件  |
 | asyncChunkKey  | `string` |     -      |  client 端获取依赖 chunk 的 domid  |
+| runtimeName    |  `string` or `array`  | 'runtime'  | 从入口文件分离出的 runtime js文件 |
 
 ```javascript
 const collect = createCollect({
@@ -44,6 +45,8 @@ collect.getInlineStyles().then((data) => { // 返回内联的样式
     console.log(data);
 });
 ```
+
+runtimeName一般不需要配置，使用默认值即可，如果有修改，则需要传入对应的 runtimeChunk 的名称，有多个 runtimeChunk 则传入数组，具体说明详见[webpack runtime](https://webpack.docschina.org/configuration/optimization/#optimization-runtimechunk)。
 
 ### createAssets(chunks, publicPath)
 

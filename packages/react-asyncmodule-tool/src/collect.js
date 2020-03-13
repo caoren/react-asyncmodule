@@ -15,6 +15,7 @@ import {
  * chunkName, 当前需要提取 assets 的 chunk 名称
  * entrypoints, 入口文件
  * stats, webpack 生成的文件索引
+ * runtimeName, 入口索引文件，默认`runtime`
  */
 class Collect {
     constructor(option = {}) {
@@ -22,6 +23,7 @@ class Collect {
             chunkName,
             entrypoints,
             asyncChunkKey,
+            runtimeName = 'runtime',
             stats = {}
         } = option;
         if (!chunkName) {
@@ -32,6 +34,7 @@ class Collect {
         this.chunks = Array.isArray(chunkName) ? chunkName : [chunkName];
         // 默认获取 stats 中 entrypoints 的第一个
         this.entrypoints = Array.isArray(entrypoints) ? entrypoints : [entrypoints || Object.keys(stats.entrypoints)[0]];
+        this.runtimeName = Array.isArray(runtimeName) ? runtimeName : [runtimeName];
         // 根据获取对应的 assets
         this.assets = this.getAssetsByName();
     }
@@ -39,7 +42,8 @@ class Collect {
     createCollectChunk(asset) {
         const { publicPath, outputPath } = this.stats;
         return {
-            name: asset,
+            name: asset.split('.')[0],
+            filename: asset,
             path: joinPath(outputPath, asset),
             url: joinPath(publicPath, asset)
         }
@@ -57,12 +61,34 @@ class Collect {
     }
     
     getRelatedChunk() {
-        const { chunks } = this;
+        const { chunks, entrypoints, runtimeName } = this;
         const { namedChunkGroups } = this.stats;
-        const rchunks = chunks.reduce((prev, cur) => {
+        // chunks可能是数字，不是字符串，故需要通过 assets 来获取对应的 chunk
+        const realEnterpoints = [];
+        const realRuntimeName = [];
+        entrypoints.forEach((item, n) => {
+            const curchunks = namedChunkGroups[item].chunks;
+            // 只保留js，过滤其余的 css 或者 map 等
+            const curassets = namedChunkGroups[item].assets
+                .filter(filterJs)
+                .map(item => item.split('.')[0]);
+            const renpIdx = curassets.findIndex(as => as === item);
+            if (renpIdx > -1) {
+                realEnterpoints.push(curchunks[renpIdx]);
+            }
+            const runIdx = curassets.findIndex(as => as === runtimeName[n]);
+            if (runIdx > -1) {
+                realRuntimeName.push(curchunks[runIdx]);
+            }
+        });
+        // webpack打包 chunk 依赖有遗漏，把 entrypoints 也传入
+        const tchunks = [].concat(entrypoints, chunks);
+        const rchunks = tchunks.reduce((prev, cur) => {
             const curChunks = namedChunkGroups[cur].chunks;
             return prev.concat(curChunks);
-        }, []);
+        }, [])
+        .filter(item => realEnterpoints.indexOf(item) === -1) // 去掉入口文件
+        .filter(item => realRuntimeName.indexOf(item) === -1); // 去掉 runtime
         const lastChunks = uniq(rchunks);
         return lastChunks;
     }
@@ -101,10 +127,11 @@ class Collect {
         return mainLink.join('');
     }
 
-    getScripts() {
-        const { assets } = this;
+    getScripts({ hasRuntime = false } = {}) {
+        const { assets, runtimeName } = this;
         const mainScript = assets
             .filter(item => filterJs(item.url))
+            .filter(item => hasRuntime ? true : runtimeName.indexOf(item.name) === -1)
             .map(item => mapScript(item.url, true));
         return [this.getAsyncChunks()].concat(mainScript).join('');
     }

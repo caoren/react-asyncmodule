@@ -31,8 +31,8 @@ export var mapScript = function mapScript(item) {
 };
 
 // 生成完成的 style
-export var mapStyle = function mapStyle(item) {
-    return '<style type="text/css">' + item + '</style>';
+export var mapStyle = function mapStyle(item, url) {
+    return '<style data-href="' + url + '" type="text/css">' + item + '</style>';
 };
 
 // 生成完整的 link 格式

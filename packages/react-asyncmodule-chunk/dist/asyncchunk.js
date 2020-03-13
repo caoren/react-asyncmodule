@@ -1,22 +1,22 @@
+'use strict';
 
-
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-const _react = require('react');
+var _react = require('react');
 
-const _react2 = _interopRequireDefault(_react);
+var _react2 = _interopRequireDefault(_react);
 
-const _asynccontext = require('./asynccontext');
+var _asynccontext = require('./asynccontext');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _objectWithoutProperties(obj, keys) { const target = {}; for (const i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-const AsyncChunk = function AsyncChunk(props) {
-    const { children } = props;
-    const providerValue = _objectWithoutProperties(props, ['children']);
+var AsyncChunk = function AsyncChunk(props) {
+    var children = props.children,
+        providerValue = _objectWithoutProperties(props, ['children']);
 
     return _react2.default.createElement(
         _asynccontext.AsyncProvider,
@@ -25,4 +25,4 @@ const AsyncChunk = function AsyncChunk(props) {
     );
 };
 exports.default = AsyncChunk;
-module.exports = exports.default;
+module.exports = exports['default'];
