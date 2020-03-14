@@ -55,5 +55,6 @@
   },
   "dependencies": {
     "react-asyncmodule": "^1.1.0-alpha.1"
-  }
+  },
+  "gitHead": "e704bf27d8842530793674cac7c39e6dfcf83d89"
 }

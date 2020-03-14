@@ -77,5 +77,6 @@
     "transform": {
       "^.+\\.js$": "babel-jest"
     }
-  }
+  },
+  "gitHead": "e704bf27d8842530793674cac7c39e6dfcf83d89"
 }

@@ -105,5 +105,6 @@
   "browserslist": [
     "iOS >= 8.0",
     "Android >= 4.4"
-  ]
+  ],
+  "gitHead": "e704bf27d8842530793674cac7c39e6dfcf83d89"
 }

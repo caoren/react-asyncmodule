@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-asyncmodule-import",
-  "version": "1.1.0-alpha.1",
+  "version": "1.1.0-alpha.2",
   "description": "A babel plugin",
   "main": "dist/index.js",
   "scripts": {
@@ -41,7 +41,5 @@
     "babel-register": "^6.26.0",
     "jest": "^23.5.0"
   },
-  "dependencies": {
-    "react-asyncmodule-tool": "^0.1.0"
-  }
+  "gitHead": "e704bf27d8842530793674cac7c39e6dfcf83d89"
 }
