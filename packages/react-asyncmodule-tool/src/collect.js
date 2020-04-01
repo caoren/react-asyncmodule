@@ -23,28 +23,27 @@ class Collect {
             chunkName,
             entrypoints,
             asyncChunkKey,
+            outputPath,
             runtimeName = 'runtime',
             stats = {}
         } = option;
-        if (!chunkName) {
-            throw new Error('`chunkName` must be existed');
-        }
         this.asyncChunkKey = asyncChunkKey;
         this.stats = stats;
-        this.chunks = Array.isArray(chunkName) ? chunkName : [chunkName];
+        this.chunks = chunkName ? (Array.isArray(chunkName) ? chunkName : [chunkName]) : [];
         // 默认获取 stats 中 entrypoints 的第一个
         this.entrypoints = Array.isArray(entrypoints) ? entrypoints : [entrypoints || Object.keys(stats.entrypoints)[0]];
         this.runtimeName = Array.isArray(runtimeName) ? runtimeName : [runtimeName];
+        this.outputPath = outputPath || stats.outputPath;
         // 根据获取对应的 assets
         this.assets = this.getAssetsByName();
     }
 
     createCollectChunk(asset) {
-        const { publicPath, outputPath } = this.stats;
+        const { publicPath } = this.stats;
         return {
             name: asset.split('.')[0],
             filename: asset,
-            path: joinPath(outputPath, asset),
+            path: joinPath(this.outputPath, asset),
             url: joinPath(publicPath, asset)
         }
     }
@@ -52,6 +51,7 @@ class Collect {
     getAssetsByName() {
         const { namedChunkGroups } = this.stats;
         const tchunks = [].concat(this.entrypoints, this.chunks);
+
         const tassets = tchunks.reduce((prev, item) => {
             const { assets } = namedChunkGroups[item];
             return prev.concat(assets);

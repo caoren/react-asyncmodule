@@ -23,20 +23,19 @@ var Collect = function () {
         var chunkName = option.chunkName,
             entrypoints = option.entrypoints,
             asyncChunkKey = option.asyncChunkKey,
+            outputPath = option.outputPath,
             _option$runtimeName = option.runtimeName,
             runtimeName = _option$runtimeName === undefined ? 'runtime' : _option$runtimeName,
             _option$stats = option.stats,
             stats = _option$stats === undefined ? {} : _option$stats;
 
-        if (!chunkName) {
-            throw new Error('`chunkName` must be existed');
-        }
         this.asyncChunkKey = asyncChunkKey;
         this.stats = stats;
-        this.chunks = Array.isArray(chunkName) ? chunkName : [chunkName];
+        this.chunks = chunkName ? Array.isArray(chunkName) ? chunkName : [chunkName] : [];
         // 默认获取 stats 中 entrypoints 的第一个
         this.entrypoints = Array.isArray(entrypoints) ? entrypoints : [entrypoints || Object.keys(stats.entrypoints)[0]];
         this.runtimeName = Array.isArray(runtimeName) ? runtimeName : [runtimeName];
+        this.outputPath = outputPath || stats.outputPath;
         // 根据获取对应的 assets
         this.assets = this.getAssetsByName();
     }
@@ -44,14 +43,12 @@ var Collect = function () {
     _createClass(Collect, [{
         key: 'createCollectChunk',
         value: function createCollectChunk(asset) {
-            var _stats = this.stats,
-                publicPath = _stats.publicPath,
-                outputPath = _stats.outputPath;
+            var publicPath = this.stats.publicPath;
 
             return {
                 name: asset.split('.')[0],
                 filename: asset,
-                path: joinPath(outputPath, asset),
+                path: joinPath(this.outputPath, asset),
                 url: joinPath(publicPath, asset)
             };
         }
@@ -63,6 +60,7 @@ var Collect = function () {
             var namedChunkGroups = this.stats.namedChunkGroups;
 
             var tchunks = [].concat(this.entrypoints, this.chunks);
+
             var tassets = tchunks.reduce(function (prev, item) {
                 var assets = namedChunkGroups[item].assets;
 

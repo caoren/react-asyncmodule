@@ -27,8 +27,9 @@ options的属性
 
 | Name           | Type       | Default | Description         |
 | -------------- | ---------- | ------- | ------------------- |
-| chunkName      | `string` or `array` | -  | 必填，当前 chunk 的名称，根据该值获取对应的资源文件  |
-| stats          | `object`         | -   | 必填，webpack 构建生成的 stats  |
+| chunkName      | `string` or `array` | -  | 当前 chunk 的名称，根据该值获取对应的资源文件，若为空则返回入口相关资源  |
+| stats          | `object`         | -   | 必填，webpack 构建生成的 stats，推荐使用 [webpack-stats-plugin](https://github.com/FormidableLabs/webpack-stats-plugin)提取  |
+| outputPath     | `string`              |  stats 的 outputPath | 工程构建后 client 端的资源文件路径 |
 | entrypoints    | `string` or `array`   |  工程的 entry           | 入口文件  |
 | asyncChunkKey  | `string` |     -      |  client 端获取依赖 chunk 的 domid  |
 | runtimeName    |  `string` or `array`  | 'runtime'  | 从入口文件分离出的 runtime js文件 |
