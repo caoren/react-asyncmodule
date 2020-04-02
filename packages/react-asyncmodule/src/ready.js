@@ -11,6 +11,7 @@ const ready = (done, {
     if (scriptElement) {
         asyncChunks = JSON.parse(scriptElement.textContent);
     }
+    let isDone = false;
     if (asyncChunks) {
         return new Promise((resolve) => {
             window[chunkInArray] = window[chunkInArray] || [];
@@ -18,9 +19,12 @@ const ready = (done, {
             const loadedChunks = window[chunkInArray];
             const originPush = loadedChunks.push;
             const checkReady = () => {
+                if (isDone) {
+                    return;
+                }
                 const isResolved = asyncChunks.every(item => loadedChunks.some(chunks => chunks[0].indexOf(item) > -1));
                 if (isResolved) {
-                    loadedChunks.push = originPush;
+                    isDone = true;
                     resolve();
                     done();
                 }

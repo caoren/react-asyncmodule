@@ -11,6 +11,7 @@ var ready = function ready(done) {
     if (scriptElement) {
         asyncChunks = JSON.parse(scriptElement.textContent);
     }
+    var isDone = false;
     if (asyncChunks) {
         return new Promise(function (resolve) {
             window[chunkInArray] = window[chunkInArray] || [];
@@ -18,13 +19,16 @@ var ready = function ready(done) {
             var loadedChunks = window[chunkInArray];
             var originPush = loadedChunks.push;
             var checkReady = function checkReady() {
+                if (isDone) {
+                    return;
+                }
                 var isResolved = asyncChunks.every(function (item) {
                     return loadedChunks.some(function (chunks) {
                         return chunks[0].indexOf(item) > -1;
                     });
                 });
                 if (isResolved) {
-                    loadedChunks.push = originPush;
+                    isDone = true;
                     resolve();
                     done();
                 }

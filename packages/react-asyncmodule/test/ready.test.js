@@ -39,12 +39,16 @@ describe('asyncReady asyncChunks exist', () => {
         delete window.webpackJsonp;
     });
     test('normal', (done) => {
-        expect.assertions(2);
+        expect.assertions(4);
         const doneMock = jest.fn();
         expect(asyncReady(doneMock)).toBeInstanceOf(Promise);
         setTimeout(() => {
             window.webpackJsonp.push([['chunkB'], { '07G2': () => {} }]);
             expect(doneMock.mock.calls).toHaveLength(1);
+            // 已经完成后再触发不会执行done
+            window.webpackJsonp.push([['chunkC'], { '07G3': () => {} }]);
+            expect(doneMock.mock.calls).toHaveLength(1);
+            expect(window.webpackJsonp.arr).toHaveLength(3);
             done();
         }, 100);
     });
