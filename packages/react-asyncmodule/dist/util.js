@@ -7,6 +7,11 @@ Object.defineProperty(exports, "__esModule", {
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 // utils
+var ASYNC_MODULE_CHUNKS = exports.ASYNC_MODULE_CHUNKS = '__ASYNC_MODULE_CHUNKS__';
+var getAsyncChunkKey = exports.getAsyncChunkKey = function getAsyncChunkKey(key) {
+    return key || ASYNC_MODULE_CHUNKS;
+};
+
 var shallowCopy = exports.shallowCopy = function shallowCopy(target) {
     if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== 'object') {
         return target;

@@ -1,6 +1,6 @@
 {
   "name": "react-asyncmodule-tool",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "react asyncmodule tool",
   "author": "caoren",
   "sideEffects": false,
@@ -52,5 +52,9 @@
     "transform": {
       "^.+\\.js$": "babel-jest"
     }
-  }
+  },
+  "dependencies": {
+    "react-asyncmodule": "^1.1.0"
+  },
+  "gitHead": "e704bf27d8842530793674cac7c39e6dfcf83d89"
 }
