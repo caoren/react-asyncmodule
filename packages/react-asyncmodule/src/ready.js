@@ -22,20 +22,22 @@ const ready = (done, {
                 if (isDone) {
                     return;
                 }
-                const isResolved = asyncChunks.every(item => loadedChunks.some(chunks => chunks[0].indexOf(item) > -1));
+                const hasChunk = item => chunks => chunks[0].indexOf(item) > -1;
+                const dealLoadChunks = item => loadedChunks.some(hasChunk(item));
+                const isResolved = asyncChunks.every(dealLoadChunks);
                 if (isResolved) {
                     isDone = true;
                     resolve();
                     done();
                 }
-            }
+            };
             loadedChunks.push = (...args) => {
                 originPush.apply(originPush, args);
                 checkReady();
-            }
+            };
             checkReady();
         });
     }
     return Promise.resolve();
-}
+};
 export default ready;

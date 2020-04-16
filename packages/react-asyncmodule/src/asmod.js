@@ -85,12 +85,13 @@ const Dueimport = (option = {}) => {
         constructor(props) {
             super(props);
             this.unmount = false;
-            const { report } = props;
+            const { report, ...otherProps } = props;
             const comp = syncModule(resolveWeak, load);
             if (report && comp) {
                 const exportStatic = {};
                 hoistNonReactStatics(exportStatic, comp);
                 exportStatic.chunkName = chunkName;
+                exportStatic.__transmitProps__ = otherProps; // eslint-disable-line
                 report(exportStatic);
             }
             this.state = {
@@ -100,10 +101,17 @@ const Dueimport = (option = {}) => {
             };
             this.retry = this.retry.bind(this);
             this.changeState = this.changeState.bind(this);
+            this.loadedCb = this.loadedCb.bind(this);
             if (!comp) {
                 this.loadComp();
-            } else if (onModuleLoaded) {
-                onModuleLoaded(comp, chunkName, isServer());
+            } else {
+                this.loadedCb(comp, isServer());
+            }
+        }
+
+        loadedCb(comp, inServer) {
+            if (onModuleLoaded) {
+                onModuleLoaded(comp, chunkName, inServer, this.changeState);
             }
         }
 
@@ -154,9 +162,7 @@ const Dueimport = (option = {}) => {
                     request: false,
                     err: ''
                 });
-                if (onModuleLoaded) {
-                    onModuleLoaded(comp, chunkName, false);
-                }
+                this.loadedCb(comp, false);
             }).catch((e) => {
                 this.clearTime();
                 this.changeState({
@@ -174,7 +180,8 @@ const Dueimport = (option = {}) => {
             const {
                 request,
                 err,
-                comp: LoadComponent
+                comp: LoadComponent,
+                ...otherState
             } = this.state;
             if (request) {
                 return LoadingView();
@@ -193,7 +200,7 @@ const Dueimport = (option = {}) => {
             }
             return isHasRender
                 ? render(overProps, LoadComponent)
-                : (<LoadComponent {...overProps} />);
+                : (<LoadComponent {...overProps} {...otherState} />);
         }
     }
     return withConsumer(AsyncComponent);

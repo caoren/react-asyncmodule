@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require('react');
@@ -119,13 +121,16 @@ var Dueimport = function Dueimport() {
             var _this = _possibleConstructorReturn(this, (AsyncComponent.__proto__ || Object.getPrototypeOf(AsyncComponent)).call(this, props));
 
             _this.unmount = false;
-            var report = props.report;
+
+            var report = props.report,
+                otherProps = _objectWithoutProperties(props, ['report']);
 
             var comp = (0, _util.syncModule)(resolveWeak, load);
             if (report && comp) {
                 var exportStatic = {};
                 (0, _hoistNonReactStatics2.default)(exportStatic, comp);
                 exportStatic.chunkName = chunkName;
+                exportStatic.__transmitProps__ = otherProps; // eslint-disable-line
                 report(exportStatic);
             }
             _this.state = {
@@ -135,15 +140,23 @@ var Dueimport = function Dueimport() {
             };
             _this.retry = _this.retry.bind(_this);
             _this.changeState = _this.changeState.bind(_this);
+            _this.loadedCb = _this.loadedCb.bind(_this);
             if (!comp) {
                 _this.loadComp();
-            } else if (onModuleLoaded) {
-                onModuleLoaded(comp, chunkName, (0, _util.isServer)());
+            } else {
+                _this.loadedCb(comp, (0, _util.isServer)());
             }
             return _this;
         }
 
         _createClass(AsyncComponent, [{
+            key: 'loadedCb',
+            value: function loadedCb(comp, inServer) {
+                if (onModuleLoaded) {
+                    onModuleLoaded(comp, chunkName, inServer, this.changeState);
+                }
+            }
+        }, {
             key: 'changeState',
             value: function changeState() {
                 var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -199,9 +212,7 @@ var Dueimport = function Dueimport() {
                         request: false,
                         err: ''
                     });
-                    if (onModuleLoaded) {
-                        onModuleLoaded(comp, chunkName, false);
-                    }
+                    _this2.loadedCb(comp, false);
                 }).catch(function (e) {
                     _this2.clearTime();
                     _this2.changeState({
@@ -221,7 +232,8 @@ var Dueimport = function Dueimport() {
                 var _state = this.state,
                     request = _state.request,
                     err = _state.err,
-                    LoadComponent = _state.comp;
+                    LoadComponent = _state.comp,
+                    otherState = _objectWithoutProperties(_state, ['request', 'err', 'comp']);
 
                 if (request) {
                     return LoadingView();
@@ -242,7 +254,7 @@ var Dueimport = function Dueimport() {
                 if (overProps.receiveData) {
                     overProps.receiveData = customData(overProps.receiveData, chunkName);
                 }
-                return isHasRender ? _render(overProps, LoadComponent) : _react2.default.createElement(LoadComponent, overProps);
+                return isHasRender ? _render(overProps, LoadComponent) : _react2.default.createElement(LoadComponent, _extends({}, overProps, otherState));
             }
         }]);
 

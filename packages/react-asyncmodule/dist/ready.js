@@ -28,11 +28,15 @@ var ready = function ready(done) {
                 if (isDone) {
                     return;
                 }
-                var isResolved = asyncChunks.every(function (item) {
-                    return loadedChunks.some(function (chunks) {
+                var hasChunk = function hasChunk(item) {
+                    return function (chunks) {
                         return chunks[0].indexOf(item) > -1;
-                    });
-                });
+                    };
+                };
+                var dealLoadChunks = function dealLoadChunks(item) {
+                    return loadedChunks.some(hasChunk(item));
+                };
+                var isResolved = asyncChunks.every(dealLoadChunks);
                 if (isResolved) {
                     isDone = true;
                     resolve();

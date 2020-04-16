@@ -6,6 +6,7 @@ class Home extends Component {
         super(props);
     }
     render() {
+        console.log('=props=', this.props);
         return (
             <React.Fragment>
                 <div className="m-home">
@@ -18,7 +19,5 @@ class Home extends Component {
         );
     }
 }
-Home.fetchData = () => {
-    console.log('=home=');
-};
+Home.fetchData = () => ({ a: 1 });
 export default Home;

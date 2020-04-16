@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { BrowserRouter, Route } from 'react-router-dom'; // eslint-disable-line
-import { hot } from 'react-hot-loader'; // eslint-disable-line
+// import { hot } from 'react-hot-loader'; // eslint-disable-line
 import AsyncModule from '../src/index';
 
 const Loading = (<div className="f-fullhg"><div className="m-loading">加载中...</div></div>);
@@ -9,8 +9,12 @@ const ErrorView = ({ onRetry }) => (<div className="f-fullhg"><div className="m-
 const AsyncComponent = AsyncModule({
     loading: Loading,
     error: <ErrorView />,
-    onModuleLoaded: (comp, chunkName, isServer) => {
+    onModuleLoaded: (comp, chunkName, isServer, setState) => {
         console.log(comp, chunkName, isServer);
+        const data = comp.fetchData();
+        setState({
+            other: data
+        });
     }
 });
 
@@ -32,4 +36,4 @@ class App extends Component {
         );
     }
 }
-export default hot(module)(App);
+export default App;
