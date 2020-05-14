@@ -13,6 +13,7 @@ Es6 used.
 ```javascript
 import {
     createCollect,
+    collectMap,
     createAssets,
     getChunkAssets
 } from 'react-asyncmodule-tool';
@@ -48,6 +49,26 @@ collect.getInlineStyles().then((data) => { // 返回内联的样式
 ```
 
 runtimeName一般不需要配置，使用默认值即可，如果有修改，则需要传入对应的 runtimeChunk 的名称，有多个 runtimeChunk 则传入数组，具体说明详见[webpack runtime](https://webpack.docschina.org/configuration/optimization/#optimization-runtimechunk)。
+
+### collectMap(options)
+
+提前读取 css 文件至内存，通用用在 app.listen 前。
+
+options的属性
+
+| Name           | Type       | Default | Description         |
+| -------------- | ---------- | ------- | ------------------- |
+| stats          | `object`         | -   | 必填，webpack 构建生成的 stats，推荐使用 [webpack-stats-plugin](https://github.com/FormidableLabs/webpack-stats-plugin)提取  |
+| outputPath     | `string`              |  stats 的 outputPath | 工程构建后 client 端的资源文件路径 |
+
+```javascript
+const collect = collectMap.prefetchCss({
+    stats,
+    outputPath
+}).then((res) => {
+    // app.listen
+});
+```
 
 ### createAssets(chunks, publicPath)
 

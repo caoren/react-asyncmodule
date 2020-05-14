@@ -136,11 +136,12 @@ const List = AsyncModule({
 
 ### onModuleLoaded
 
-module加载完执行，返回4个参数
+module加载完执行，返回 1 个 options 对象, 包含 5 个属性，详细如下。
 
-* comp, 当前module
+* component, 当前module
 * chunkName, 当前module的chunk名称
 * isServer, 当前是否为 node 端
 * setState, 可设置当前 AsyncMosule 组件的state，以 props 方式透传到 comp 内
+* props, 当前组件的props
 
-`onModuleLoaded(comp, chunkName, isServer, setState)`
+`onModuleLoaded(options)`

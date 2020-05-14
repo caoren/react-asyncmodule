@@ -69,8 +69,8 @@ describe('AsyncModule memory', () => {
     });
     test('client found', (done) => {
         expect.assertions(5);
-        const mockLoaded = jest.fn((comp, chunkName, isServer) => {
-            expect(comp).toEqual(Home);
+        const mockLoaded = jest.fn(({ component, chunkName, isServer }) => {
+            expect(component).toEqual(Home);
             expect(chunkName).toBe('home');
             expect(isServer).toBeFalsy();
             done();

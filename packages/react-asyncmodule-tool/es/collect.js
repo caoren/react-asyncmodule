@@ -3,6 +3,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 import { getAsyncChunkKey } from 'react-asyncmodule';
+import collectMap from './resourcemap';
 import fs from 'fs';
 import { filterJs, filterCss, mapScript, mapLink, mapStyle, uniq, joinPath } from './helper';
 
@@ -132,24 +133,37 @@ var Collect = function () {
 
             var mainLinks = assets.filter(function (item) {
                 return filterCss(item.url);
-            }).map(function (item) {
-                return new Promise(function (resolve, reject) {
-                    fs.readFile(item.path, 'utf8', function (err, data) {
-                        if (err) {
-                            reject(err);
-                            return;
-                        }
-                        resolve({ data: data, url: item.url });
+            });
+            var cssMap = collectMap.getCSSMap();
+            if (cssMap) {
+                return mainLinks.map(function (item) {
+                    return {
+                        data: cssMap[item.path],
+                        url: item.url
+                    };
+                }).map(function (item) {
+                    return mapStyle(item.data, item.url);
+                }).join('');
+            } else {
+                var linksPromises = mainLinks.map(function (item) {
+                    return new Promise(function (resolve, reject) {
+                        fs.readFile(item.path, 'utf8', function (err, data) {
+                            if (err) {
+                                reject(err);
+                                return;
+                            }
+                            resolve({ data: data, url: item.url });
+                        });
                     });
                 });
-            });
-            return Promise.all(mainLinks).then(function (res) {
-                return res.map(function (item) {
-                    return mapStyle(item.data, item.url);
+                return Promise.all(linksPromises).then(function (res) {
+                    return res.map(function (item) {
+                        return mapStyle(item.data, item.url);
+                    });
+                }).then(function (res) {
+                    return res.join('');
                 });
-            }).then(function (res) {
-                return res.join('');
-            });
+            }
         }
     }, {
         key: 'getStyles',

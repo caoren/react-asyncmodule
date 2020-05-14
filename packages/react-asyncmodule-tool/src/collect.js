@@ -1,4 +1,5 @@
 import { getAsyncChunkKey } from 'react-asyncmodule';
+import collectMap from './resourcemap';
 import fs from 'fs';
 import {
     filterJs,
@@ -104,19 +105,29 @@ class Collect {
     getInlineStyles() {
         const { assets } = this;
         const mainLinks = assets
-            .filter(item => filterCss(item.url))
-            .map(item => new Promise((resolve, reject) => {
-                fs.readFile(item.path, 'utf8', (err, data) => {
-                    if (err) {
-                        reject(err)
-                        return;
-                    }
-                    resolve({ data, url: item.url });
-                });
-            }));
-        return Promise.all(mainLinks)
-            .then(res => res.map(item => mapStyle(item.data, item.url)))
-            .then(res => res.join(''));
+            .filter(item => filterCss(item.url));
+        const cssMap = collectMap.getCSSMap();
+        if (cssMap) {
+            return mainLinks.map((item) => {
+                return {
+                    data: cssMap[item.path],
+                    url: item.url
+                }
+            }).map(item => mapStyle(item.data, item.url)).join('');
+        } else {
+            const linksPromises = mainLinks.map(item => new Promise((resolve, reject) => {
+                    fs.readFile(item.path, 'utf8', (err, data) => {
+                        if (err) {
+                            reject(err)
+                            return;
+                        }
+                        resolve({ data, url: item.url });
+                    });
+                }));
+            return Promise.all(linksPromises)
+                .then(res => res.map(item => mapStyle(item.data, item.url)))
+                .then(res => res.join(''));
+        }
     }
 
     getStyles() {

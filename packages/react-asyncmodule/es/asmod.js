@@ -138,7 +138,13 @@ var Dueimport = function Dueimport() {
             key: 'loadedCb',
             value: function loadedCb(comp, inServer) {
                 if (onModuleLoaded) {
-                    onModuleLoaded(comp, chunkName, inServer, this.changeState);
+                    onModuleLoaded({
+                        chunkName: chunkName,
+                        props: this.props,
+                        isServer: inServer,
+                        component: comp,
+                        setState: this.changeState
+                    });
                 }
             }
         }, {

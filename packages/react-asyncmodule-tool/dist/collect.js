@@ -9,6 +9,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _reactAsyncmodule = require('react-asyncmodule');
 
+var _resourcemap = require('./resourcemap');
+
+var _resourcemap2 = _interopRequireDefault(_resourcemap);
+
 var _fs = require('fs');
 
 var _fs2 = _interopRequireDefault(_fs);
@@ -144,24 +148,37 @@ var Collect = function () {
 
             var mainLinks = assets.filter(function (item) {
                 return (0, _helper.filterCss)(item.url);
-            }).map(function (item) {
-                return new Promise(function (resolve, reject) {
-                    _fs2.default.readFile(item.path, 'utf8', function (err, data) {
-                        if (err) {
-                            reject(err);
-                            return;
-                        }
-                        resolve({ data: data, url: item.url });
+            });
+            var cssMap = _resourcemap2.default.getCSSMap();
+            if (cssMap) {
+                return mainLinks.map(function (item) {
+                    return {
+                        data: cssMap[item.path],
+                        url: item.url
+                    };
+                }).map(function (item) {
+                    return (0, _helper.mapStyle)(item.data, item.url);
+                }).join('');
+            } else {
+                var linksPromises = mainLinks.map(function (item) {
+                    return new Promise(function (resolve, reject) {
+                        _fs2.default.readFile(item.path, 'utf8', function (err, data) {
+                            if (err) {
+                                reject(err);
+                                return;
+                            }
+                            resolve({ data: data, url: item.url });
+                        });
                     });
                 });
-            });
-            return Promise.all(mainLinks).then(function (res) {
-                return res.map(function (item) {
-                    return (0, _helper.mapStyle)(item.data, item.url);
+                return Promise.all(linksPromises).then(function (res) {
+                    return res.map(function (item) {
+                        return (0, _helper.mapStyle)(item.data, item.url);
+                    });
+                }).then(function (res) {
+                    return res.join('');
                 });
-            }).then(function (res) {
-                return res.join('');
-            });
+            }
         }
     }, {
         key: 'getStyles',

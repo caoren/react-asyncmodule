@@ -111,7 +111,13 @@ const Dueimport = (option = {}) => {
 
         loadedCb(comp, inServer) {
             if (onModuleLoaded) {
-                onModuleLoaded(comp, chunkName, inServer, this.changeState);
+                onModuleLoaded({
+                    chunkName,
+                    props: this.props,
+                    isServer: inServer,
+                    component: comp,
+                    setState: this.changeState
+                });
             }
         }
 

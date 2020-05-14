@@ -1,5 +1,5 @@
 import path from 'path';
-import Collect, { createCollect } from '../src/index';
+import Collect, { createCollect, collectMap } from '../src/index';
 
 const stats = {
     entrypoints: {
@@ -255,5 +255,19 @@ describe('runtimeName', () => {
             runtimeName: ['runtimea']
         });
         expect(res.getScripts({ hasRuntime: true })).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">[1,4,5]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/commons.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/runtimea.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/default.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/a.js"></script>');
+    });
+});
+
+describe('getInlineStyles', () => {
+    test('change', () => {
+        return collectMap.prefetchCss({
+            stats: stats3,
+        }).then(() => {
+            const res = createCollect({
+                stats: stats3,
+                chunkName: 'a'
+            });
+            return expect(res.getInlineStyles()).toBe('<style data-href="//s.iplay.126.net/t/s/commons.css" type="text/css">.common{color: #f00}</style><style data-href="//s.iplay.126.net/t/s/a.css" type="text/css">.a{color: #000}</style>');
+        });
     });
 });
