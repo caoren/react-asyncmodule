@@ -13,8 +13,8 @@ class Home extends Component {
         super(props);
     }
     render() {
-        const { receiveData } = this.props;
-        const { c } = receiveData || {};
+        const { c } = this.props;
+        // const { c } = receiveData || {};
         const text = c ? `首页${c}` : '首页';
         return (
             <div className="m-home">
