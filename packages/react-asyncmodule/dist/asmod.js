@@ -258,8 +258,10 @@ var Dueimport = function Dueimport() {
                     overProps = _objectWithoutProperties(_props, ['report']);
 
                 if (overProps.receiveData) {
-                    overProps.receiveData = customData(overProps.receiveData, chunkName);
+                    Object.assign(overProps, customData(overProps.receiveData, chunkName));
+                    delete overProps.receiveData;
                 }
+
                 return isHasRender ? _render(overProps, LoadComponent) : _react2.default.createElement(LoadComponent, _extends({}, overProps, otherState));
             }
         }]);

@@ -202,8 +202,10 @@ const Dueimport = (option = {}) => {
             }
             const { report, ...overProps } = this.props;
             if (overProps.receiveData) {
-                overProps.receiveData = customData(overProps.receiveData, chunkName);
+                Object.assign(overProps, customData(overProps.receiveData, chunkName));
+                delete overProps.receiveData;
             }
+
             return isHasRender
                 ? render(overProps, LoadComponent)
                 : (<LoadComponent {...overProps} {...otherState} />);
