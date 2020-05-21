@@ -200,9 +200,12 @@ const Dueimport = (option = {}) => {
             if (!LoadComponent) {
                 return null;
             }
-            const { report, ...overProps } = this.props;
+            let { report, ...overProps } = this.props;
             if (overProps.receiveData) {
-                Object.assign(overProps, customData(overProps.receiveData, chunkName));
+                overProps = {
+                    ...overProps,
+                    ...customData(overProps.receiveData, chunkName)
+                };
                 delete overProps.receiveData;
             }
 

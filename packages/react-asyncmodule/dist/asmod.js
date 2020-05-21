@@ -258,7 +258,7 @@ var Dueimport = function Dueimport() {
                     overProps = _objectWithoutProperties(_props, ['report']);
 
                 if (overProps.receiveData) {
-                    Object.assign(overProps, customData(overProps.receiveData, chunkName));
+                    overProps = _extends({}, overProps, customData(overProps.receiveData, chunkName));
                     delete overProps.receiveData;
                 }
 
