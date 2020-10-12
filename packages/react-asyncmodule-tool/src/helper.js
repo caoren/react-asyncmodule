@@ -27,6 +27,9 @@ export const mapStyle = (item, url) => `<style data-href="${url}" type="text/css
 // 生成完整的 link 格式
 export const mapLink = item => `<link href="${item}" rel="stylesheet">`;
 
+// 如果是对象，则取 name 属性值
+export const mapString = item => typeof item === 'object' ? item.name : item;
+
 // 去除数组的重复数据，未考虑数字和字符串的差别，故只适用于该场景
 export const uniq = (arr) => {
     const obj = {};

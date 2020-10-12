@@ -8,7 +8,8 @@ import {
     mapLink,
     mapStyle,
     uniq,
-    joinPath
+    joinPath,
+    mapString
 } from './helper';
 
 /*
@@ -56,7 +57,7 @@ class Collect {
         const tassets = tchunks.reduce((prev, item) => {
             const { assets } = namedChunkGroups[item];
             return prev.concat(assets);
-        }, []);
+        }, []).map(mapString);
         const lastAssets = uniq(tassets);
         return lastAssets.map(item => this.createCollectChunk(item));
     }
@@ -71,6 +72,7 @@ class Collect {
             const curchunks = namedChunkGroups[item].chunks;
             // 只保留js，过滤其余的 css 或者 map 等
             const curassets = namedChunkGroups[item].assets
+                .map(mapString)
                 .filter(filterJs)
                 .map(item => item.split('.')[0]);
             const renpIdx = curassets.findIndex(as => as === item);

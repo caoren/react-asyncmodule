@@ -3,6 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 // entry unique
 var ENTRYKEY = exports.ENTRYKEY = '@ENTRY';
 
@@ -43,6 +46,11 @@ var mapStyle = exports.mapStyle = function mapStyle(item, url) {
 // 生成完整的 link 格式
 var mapLink = exports.mapLink = function mapLink(item) {
     return '<link href="' + item + '" rel="stylesheet">';
+};
+
+// 如果是对象，则取 name 属性值
+var mapString = exports.mapString = function mapString(item) {
+    return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' ? item.name : item;
 };
 
 // 去除数组的重复数据，未考虑数字和字符串的差别，故只适用于该场景

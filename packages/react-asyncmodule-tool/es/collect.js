@@ -5,7 +5,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 import { getAsyncChunkKey } from 'react-asyncmodule';
 import collectMap from './resourcemap';
 import fs from 'fs';
-import { filterJs, filterCss, mapScript, mapLink, mapStyle, uniq, joinPath } from './helper';
+import { filterJs, filterCss, mapScript, mapLink, mapStyle, uniq, joinPath, mapString } from './helper';
 
 /*
  * 根据 chunkName 获取对应的 assets
@@ -66,7 +66,7 @@ var Collect = function () {
                 var assets = namedChunkGroups[item].assets;
 
                 return prev.concat(assets);
-            }, []);
+            }, []).map(mapString);
             var lastAssets = uniq(tassets);
             return lastAssets.map(function (item) {
                 return _this.createCollectChunk(item);
@@ -86,7 +86,7 @@ var Collect = function () {
             entrypoints.forEach(function (item, n) {
                 var curchunks = namedChunkGroups[item].chunks;
                 // 只保留js，过滤其余的 css 或者 map 等
-                var curassets = namedChunkGroups[item].assets.filter(filterJs).map(function (item) {
+                var curassets = namedChunkGroups[item].assets.map(mapString).filter(filterJs).map(function (item) {
                     return item.split('.')[0];
                 });
                 var renpIdx = curassets.findIndex(function (as) {

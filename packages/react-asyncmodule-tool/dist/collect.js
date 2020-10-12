@@ -81,7 +81,7 @@ var Collect = function () {
                 var assets = namedChunkGroups[item].assets;
 
                 return prev.concat(assets);
-            }, []);
+            }, []).map(_helper.mapString);
             var lastAssets = (0, _helper.uniq)(tassets);
             return lastAssets.map(function (item) {
                 return _this.createCollectChunk(item);
@@ -101,7 +101,7 @@ var Collect = function () {
             entrypoints.forEach(function (item, n) {
                 var curchunks = namedChunkGroups[item].chunks;
                 // 只保留js，过滤其余的 css 或者 map 等
-                var curassets = namedChunkGroups[item].assets.filter(_helper.filterJs).map(function (item) {
+                var curassets = namedChunkGroups[item].assets.map(_helper.mapString).filter(_helper.filterJs).map(function (item) {
                     return item.split('.')[0];
                 });
                 var renpIdx = curassets.findIndex(function (as) {
