@@ -1,6 +1,26 @@
+import { AsyncOperate } from './index';
 import {
-    getAsyncChunkKey
+    getAsyncChunkKey,
+    getAsyncModuleName
 } from './util';
+
+export const chunkReady = (done, {
+    asyncModuleName
+} = {}) => {
+    const scriptElement = document.getElementById(getAsyncModuleName(asyncModuleName));
+    let asyncModules;
+    if (scriptElement) {
+        asyncModules = JSON.parse(scriptElement.textContent);
+    }
+    if (asyncModules) {
+        return Promise.all(asyncModules.map((item) => {
+            const curModule = AsyncOperate.get(item);
+            const promise = curModule ? curModule.preload() : Promise.resolve();
+            return promise;
+        })).then(done);
+    }
+    return Promise.resolve();
+};
 
 const ready = (done, {
     asyncChunkKey,

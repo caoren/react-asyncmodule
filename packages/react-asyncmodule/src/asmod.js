@@ -23,6 +23,43 @@ const packComponent = comp => (props) => {
 const customData = (data = {}, chunkName) => data[chunkName];
 
 /*
+ * 存储所有 module, key 为 weakId
+ * {
+ *      [chunkName]: {
+ *          weakId,
+ *          chunkName,
+ *          preload
+ *      }
+ * }
+ */
+const ASYNCMODULE_ALLMODULE = {};
+export const AsyncOperate = {
+    get(chunkName) {
+        return ASYNCMODULE_ALLMODULE[chunkName];
+    },
+    set(data) {
+        const {
+            chunkName
+        } = data;
+        if (ASYNCMODULE_ALLMODULE[chunkName]) {
+            return;
+        }
+        ASYNCMODULE_ALLMODULE[chunkName] = data;
+    },
+    remove(data) {
+        if (data) {
+            const { weekId, chunkName } = data;
+            if (__webpack_modules__[weekId]) { // eslint-disable-line
+                __webpack_modules__[weekId] = undefined; // eslint-disable-line
+            }
+            ASYNCMODULE_ALLMODULE[chunkName] = undefined;
+        } else {
+            // eslint-disable-next-line max-len
+            Object.keys(ASYNCMODULE_ALLMODULE).forEach(item => AsyncOperate.remove(ASYNCMODULE_ALLMODULE[item]));
+        }
+    }
+};
+/*
  * options
  * @load `function` return a `Promise` instance
  * @render `function` custom render
@@ -65,16 +102,24 @@ const Dueimport = (option = {}) => {
     const ErrorView = packComponent(error);
     const isDelay = typeof delay === 'number' && delay !== 0;
     const isTimeout = typeof timeout === 'number' && timeout !== 0;
+    const weekId = resolveWeak ? resolveWeak() : null;
+    const preload = () => {
+        const comp = syncModule(resolveWeak);
+        // console.log('=asyncmodule comp=', comp);
+        return Promise.resolve().then(() => {
+            if (comp) {
+                return comp;
+            }
+            return load();
+        });
+    };
+    AsyncOperate.set({
+        weekId,
+        chunkName,
+        preload
+    });
     class AsyncComponent extends Component {
-        static preload() {
-            const comp = syncModule(resolveWeak);
-            return Promise.resolve().then(() => {
-                if (comp) {
-                    return comp;
-                }
-                return load();
-            });
-        }
+        static preload = preload;
 
         static preloadWeak() {
             return syncModule(resolveWeak);

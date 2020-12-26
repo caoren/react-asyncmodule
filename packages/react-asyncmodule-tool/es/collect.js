@@ -2,17 +2,83 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-import { getAsyncChunkKey } from 'react-asyncmodule';
+import { getAsyncChunkKey, getAsyncModuleName } from 'react-asyncmodule';
 import collectMap from './resourcemap';
 import fs from 'fs';
 import { filterJs, filterCss, mapScript, mapLink, mapStyle, uniq, joinPath, mapString } from './helper';
 
+// stats 中的 chunk 存在id(数字)和name(字符串)两种情况
+var getChunkByName = function getChunkByName(idx, chunks) {
+    if (typeof idx === 'string') {
+        var res = chunks.filter(function (item) {
+            return item.id === idx;
+        });
+        return res[0];
+    }
+    return chunks[idx];
+};
+
+var connectNameGroupsFromChunks = function connectNameGroupsFromChunks(stats) {
+    var _stats$chunks = stats.chunks,
+        chunks = _stats$chunks === undefined ? [] : _stats$chunks,
+        namedChunkGroups = stats.namedChunkGroups;
+
+    Object.keys(namedChunkGroups).forEach(function (item) {
+        // chunk 名和 asset 名不一定相等
+        var itemChunks = namedChunkGroups[item].chunks;
+        var itemAssets = namedChunkGroups[item].assets;
+        var insChunks = [];
+        var insAssets = [];
+        itemChunks.forEach(function (chk) {
+            /*
+             * 从 stats 中的 chunks 中获取该 chunk 的依赖
+             * chunk 中的 parents 就是依赖，该属性值存储的是 chunks 数组的下标
+             */
+            var _ref = getChunkByName(chk, chunks) || {},
+                parents = _ref.parents;
+
+            if (parents && parents.length > 0) {
+                // 从 chunks 获取 parents 的资源文件
+                parents.forEach(function (child) {
+                    /*
+                     * entry 表示为入口chunk, federation 是 remote 依赖，故 files 为空
+                     * 过滤入口 chunk，过滤 federation 的依赖
+                     */
+                    var _ref2 = getChunkByName(child, chunks) || {},
+                        entry = _ref2.entry,
+                        files = _ref2.files;
+
+                    if (!entry && files && files.length > 0) {
+                        insChunks.push(child);
+                        insAssets.push.apply(insAssets, files);
+                    }
+                });
+            }
+        });
+        if (insChunks.length > 0) {
+            // chunk 间的 parents 可能存在重复，加上去重
+            itemChunks.unshift.apply(itemChunks, uniq(insChunks));
+            namedChunkGroups[item].chunks = itemChunks;
+        }
+        if (insAssets.length > 0) {
+            // 同上
+            itemAssets.unshift.apply(itemAssets, uniq(insAssets));
+            namedChunkGroups[item].assets = itemAssets;
+        }
+    });
+    return stats;
+};
 /*
  * 根据 chunkName 获取对应的 assets
  * chunkName, 当前需要提取 assets 的 chunk 名称
  * entrypoints, 入口文件
- * stats, webpack 生成的文件索引
+ * asyncChunkKey, 前端脚本依赖 json 的 id，默认为 react-asyncmodule 的 `__ASYNC_MODULE_CHUNKS__`
+ * asyncModuleName, 前端脚本依赖的 chunk 数组，默认为 react-asyncmodule 的 `__ASYNC_MODULE_NAMES__`
+ * outputPath, assets cdn path, 默认为 stats 中的 outputPath
  * runtimeName, 入口索引文件，默认`runtime`
+ * isFederation, 是否为 federation 场景，是的话则不输出 script chunk 到页面上
+ * stats, webpack 生成的文件索引
+ * extraStats, 额外的 stats, 比如 federation 的 stats
  */
 
 var Collect = function () {
@@ -24,14 +90,21 @@ var Collect = function () {
         var chunkName = option.chunkName,
             entrypoints = option.entrypoints,
             asyncChunkKey = option.asyncChunkKey,
+            asyncModuleName = option.asyncModuleName,
             outputPath = option.outputPath,
+            _option$extraStats = option.extraStats,
+            extraStats = _option$extraStats === undefined ? {} : _option$extraStats,
             _option$runtimeName = option.runtimeName,
             runtimeName = _option$runtimeName === undefined ? 'runtime' : _option$runtimeName,
+            _option$isFederation = option.isFederation,
+            isFederation = _option$isFederation === undefined ? false : _option$isFederation,
             _option$stats = option.stats,
             stats = _option$stats === undefined ? {} : _option$stats;
 
+        this.isFederation = isFederation;
         this.asyncChunkKey = asyncChunkKey;
-        this.stats = stats;
+        this.asyncModuleName = asyncModuleName;
+        this.stats = connectNameGroupsFromChunks(stats);
         this.chunks = chunkName ? Array.isArray(chunkName) ? chunkName : [chunkName] : [];
         // 默认获取 stats 中 entrypoints 的第一个
         this.entrypoints = Array.isArray(entrypoints) ? entrypoints : [entrypoints || Object.keys(stats.entrypoints)[0]];
@@ -39,6 +112,8 @@ var Collect = function () {
         this.outputPath = outputPath || stats.outputPath;
         // 根据获取对应的 assets
         this.assets = this.getAssetsByName();
+        this.assetsExtra = isFederation ? this.getAsstesByExtra(this.stats, extraStats) : [];
+        this.assetsLite = this.getAssetsByName(isFederation);
     }
 
     _createClass(Collect, [{
@@ -54,13 +129,67 @@ var Collect = function () {
             };
         }
     }, {
+        key: 'getAsstesByExtra',
+        value: function getAsstesByExtra(stats, extraStats) {
+            var chunks = this.chunks;
+            var remotesGraph = stats.remotesGraph;
+            var currentExposes = extraStats.currentExposes,
+                extraChunks = extraStats.chunks,
+                extraPath = extraStats.publicPath;
+            // 根据 chunks 从 remotesGraph 获取依赖的 federation module
+
+            var deps = chunks.reduce(function (prev, item) {
+                var modules = remotesGraph[item];
+                return prev.concat(modules.map(function (item) {
+                    return item.name;
+                }));
+            }, []);
+            console.log('=deps=', deps);
+            // 根据 deps 获取相应的 chunks
+            var depsChunks = uniq(deps.reduce(function (prev, item) {
+                var curdDep = currentExposes[item];
+                console.log('=curdDep=', curdDep);
+                return prev.concat(curdDep);
+            }, []));
+            console.log('=depsChunks=', depsChunks);
+            // 在 extraStats 中获取 chunk 路径
+            var styleAssets = depsChunks.reduce(function (prev, item) {
+                var _ref3 = getChunkByName(item, extraChunks) || {},
+                    parents = _ref3.parents,
+                    curFiles = _ref3.files;
+
+                prev.push.apply(prev, curFiles);
+                if (parents && parents.length > 0) {
+                    // 从 chunks 获取 parents 的资源文件
+                    parents.forEach(function (child) {
+                        /*
+                         * entry 表示为入口chunk, federation 是 remote 依赖，故 files 为空
+                         * 过滤入口 chunk，过滤 federation 的依赖
+                         */
+                        var _ref4 = getChunkByName(child, chunks) || {},
+                            entry = _ref4.entry,
+                            files = _ref4.files;
+
+                        if (!entry && files && files.length > 0) {
+                            prev.push.apply(prev, files);
+                        }
+                    });
+                }
+                return prev;
+            }, []).filter(filterCss).map(function (item) {
+                return '' + extraPath + item;
+            });
+            console.log('=styleAssets=', styleAssets);
+            return styleAssets.map(mapLink);
+        }
+    }, {
         key: 'getAssetsByName',
-        value: function getAssetsByName() {
+        value: function getAssetsByName(isFederation) {
             var _this = this;
 
             var namedChunkGroups = this.stats.namedChunkGroups;
 
-            var tchunks = [].concat(this.entrypoints, this.chunks);
+            var tchunks = [].concat(this.entrypoints, isFederation ? [] : this.chunks);
 
             var tassets = tchunks.reduce(function (prev, item) {
                 var assets = namedChunkGroups[item].assets;
@@ -77,7 +206,8 @@ var Collect = function () {
         value: function getRelatedChunk() {
             var chunks = this.chunks,
                 entrypoints = this.entrypoints,
-                runtimeName = this.runtimeName;
+                runtimeName = this.runtimeName,
+                isFederation = this.isFederation;
             var namedChunkGroups = this.stats.namedChunkGroups;
             // chunks可能是数字，不是字符串，故需要通过 assets 来获取对应的 chunk
 
@@ -102,8 +232,8 @@ var Collect = function () {
                     realRuntimeName.push(curchunks[runIdx]);
                 }
             });
-            // webpack打包 chunk 依赖有遗漏，把 entrypoints 也传入
-            var tchunks = [].concat(entrypoints, chunks);
+            // webpack打包 chunk 依赖有遗漏，把 entrypoints 也传入，chunks不传入
+            var tchunks = [].concat(entrypoints, isFederation ? [] : chunks);
             var rchunks = tchunks.reduce(function (prev, cur) {
                 var curChunks = namedChunkGroups[cur].chunks;
                 return prev.concat(curChunks);
@@ -125,6 +255,16 @@ var Collect = function () {
         key: 'getAsyncChunks',
         value: function getAsyncChunks() {
             return '<script id="' + getAsyncChunkKey(this.asyncChunkKey) + '" type="application/json">' + this.getAsyncChunksStr() + '</script>';
+        }
+    }, {
+        key: 'getAsyncModulesStr',
+        value: function getAsyncModulesStr() {
+            return JSON.stringify(this.chunks);
+        }
+    }, {
+        key: 'getAsyncModules',
+        value: function getAsyncModules() {
+            return '<script id="' + getAsyncModuleName(this.asyncModuleName) + '" type="application/json">' + this.getAsyncModulesStr() + '</script>';
         }
     }, {
         key: 'getInlineStyles',
@@ -175,26 +315,30 @@ var Collect = function () {
             }).map(function (item) {
                 return mapLink(item.url);
             });
-            return mainLink.join('');
+            return this.assetsExtra.concat(mainLink).join('');
         }
     }, {
         key: 'getScripts',
         value: function getScripts() {
-            var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-                _ref$hasRuntime = _ref.hasRuntime,
-                hasRuntime = _ref$hasRuntime === undefined ? false : _ref$hasRuntime;
+            var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+                _ref5$hasRuntime = _ref5.hasRuntime,
+                hasRuntime = _ref5$hasRuntime === undefined ? false : _ref5$hasRuntime;
 
-            var assets = this.assets,
-                runtimeName = this.runtimeName;
+            var chunks = this.chunks,
+                assetsLite = this.assetsLite,
+                runtimeName = this.runtimeName,
+                isFederation = this.isFederation;
 
-            var mainScript = assets.filter(function (item) {
+            var mainScript = assetsLite.filter(function (item) {
                 return filterJs(item.url);
             }).filter(function (item) {
                 return hasRuntime ? true : runtimeName.indexOf(item.name) === -1;
+            }).filter(function (item) {
+                return chunks.indexOf(item.name) === -1;
             }).map(function (item) {
                 return mapScript(item.url, true);
             });
-            return [this.getAsyncChunks()].concat(mainScript).join('');
+            return [isFederation ? this.getAsyncModules() : this.getAsyncChunks()].concat(mainScript).join('');
         }
     }]);
 

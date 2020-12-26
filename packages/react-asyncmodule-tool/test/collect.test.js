@@ -132,13 +132,14 @@ const stats2 = {
     publicPath: '//s.iplay.126.net/t/s/',
     outputPath: path.resolve(__dirname, './css/')
 }
+
 describe('createCollect', () => {
     test('default', () => {
         const res = createCollect({
             stats,
             chunkName: 'a'
         });
-        expect(res.getScripts()).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">["commons","libs","default","a"]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/commons.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/libs.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/default.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/a.js"></script>');
+        expect(res.getScripts()).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">["commons","libs","default","a"]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/commons.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/libs.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/default.js"></script>');
         expect(res.getStyles()).toBe('<link href="//s.iplay.126.net/t/s/commons.css" rel="stylesheet"><link href="//s.iplay.126.net/t/s/a.css" rel="stylesheet">');
     });
 
@@ -245,7 +246,7 @@ describe('runtimeName', () => {
             chunkName: 'a',
             runtimeName: 'runtimea'
         });
-        expect(res.getScripts()).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">[1,4,5]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/commons.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/default.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/a.js"></script>');
+        expect(res.getScripts()).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">[1,4,5]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/commons.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/default.js"></script>');
     });
 
     test('change', () => {
@@ -254,7 +255,7 @@ describe('runtimeName', () => {
             chunkName: 'a',
             runtimeName: ['runtimea']
         });
-        expect(res.getScripts({ hasRuntime: true })).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">[1,4,5]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/commons.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/runtimea.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/default.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/a.js"></script>');
+        expect(res.getScripts({ hasRuntime: true })).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">[1,4,5]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/commons.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/runtimea.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/default.js"></script>');
     });
 });
 
@@ -269,5 +270,72 @@ describe('getInlineStyles', () => {
             });
             return expect(res.getInlineStyles()).toBe('<style data-href="//s.iplay.126.net/t/s/commons.css" type="text/css">.common{color: #f00}</style><style data-href="//s.iplay.126.net/t/s/a.css" type="text/css">.a{color: #000}</style>');
         });
+    });
+});
+
+const stats4 = {
+    chunks: [
+        {
+            "files": [
+                "b.css",
+                "b.js"
+            ],
+            "parents": [
+                2
+            ]
+        },
+        {
+            "files": [
+                "app.css",
+                "app.js"
+            ],
+            "parents": []
+        },
+        {
+            "files": [
+                "common.css",
+                "common.js"
+            ],
+            "parents": [1]
+        }
+    ],
+    entrypoints: {
+        app: {
+            chunks: [1],
+            assets: [
+                'app.js',
+                'app.js.map'
+            ]
+        }
+    },
+    namedChunkGroups: {
+        app: {
+            chunks: [1],
+            assets: [
+                'app.js',
+                'app.js.map'
+            ]
+        },
+        b: {
+            chunks: [0],
+            assets: [
+                'b.js',
+                'b.js.map',
+                'b.css',
+                'b.css.map'
+            ]
+        }
+    },
+    publicPath: '//s.iplay.126.net/t/s/',
+    outputPath: path.resolve(__dirname, './css/')
+}
+describe('has parent', () => {
+    test('default', () => {
+        const res = createCollect({
+            stats: stats4,
+            chunkName: 'b'
+        });
+        expect(res.getScripts()).toBe('<script id="__ASYNC_MODULE_CHUNKS__" type="application/json">[2,0]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script><script type="text/javascript" async src="//s.iplay.126.net/t/s/common.js"></script>');
+        expect(res.getStyles()).toBe('<link href="//s.iplay.126.net/t/s/common.css" rel="stylesheet"><link href="//s.iplay.126.net/t/s/b.css" rel="stylesheet">');
     });
 });

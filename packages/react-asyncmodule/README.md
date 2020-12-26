@@ -67,25 +67,11 @@ const List = AsyncComponent(import('./list'));
 
 ### preload
 
-预加载方法，返回一个 promise 实例，可在回调中获取到当前组件。a
+预加载方法，返回一个 promise 实例，可在回调中获取到当前组件。
 
 ### preloadWeak
 
 预加载方法，不同于 `preload`，该方法是同步返回当前的组件，通常用于 server render。
-
-
-## asyncReady
-
-配合 script 的 `async` 属性使用，保证 hydrate 时 chunk 都已经加载好.
-
-```javascript
-import { asyncReady } from 'react-asyncmodule';
-
-asyncReady(() => {
-    // 依赖的 chunk 准备就绪，再进行注水，防止因 chunk 还未加载完成和 server 端渲染不一致
-    ReactDOM.hydrate();
-});
-```
 
 ## API
 
@@ -145,3 +131,44 @@ module加载完执行，返回 1 个 options 对象, 包含 5 个属性，详细
 * props, 当前组件的props
 
 `onModuleLoaded(options)`
+
+
+## other
+
+asyncmodule 组件其他的方法.
+
+### asyncReady
+
+配合 script 的 `async` 属性使用，保证 hydrate 时 chunk 都已经加载好.
+
+```javascript
+import { asyncReady } from 'react-asyncmodule';
+
+asyncReady(() => {
+    // 依赖的 chunk 准备就绪，再进行注水，防止因 chunk 还未加载完成和 server 端渲染不一致
+    ReactDOM.hydrate();
+});
+```
+
+### chunkReady
+
+配合 `federation` 的场景，保证 hydrate 时 chunk 的依赖已经加载好.
+
+```javascript
+import { chunkReady } from 'react-asyncmodule';
+
+chunkReady(() => {
+    // 依赖的 chunk 准备就绪，再进行注水，防止因 chunk 还未加载完成和 server 端渲染不一致
+    ReactDOM.hydrate();
+});
+```
+
+### AsyncOperate
+
+存储已经示例的 asyncmodule 的组件，一般用于等待依赖的场景，可获取组件执行对应的 preload.
+
+```javascript
+import { AsyncOperate } from 'react-asyncmodule';
+
+AsyncOperate.get(chunkName); // { weakId, preload }
+```

@@ -3,14 +3,36 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.chunkReady = undefined;
+
+var _index = require('./index');
 
 var _util = require('./util');
 
-var ready = function ready(done) {
+var chunkReady = exports.chunkReady = function chunkReady(done) {
     var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-        asyncChunkKey = _ref.asyncChunkKey,
-        _ref$chunkInArray = _ref.chunkInArray,
-        chunkInArray = _ref$chunkInArray === undefined ? 'webpackJsonp' : _ref$chunkInArray;
+        asyncModuleName = _ref.asyncModuleName;
+
+    var scriptElement = document.getElementById((0, _util.getAsyncModuleName)(asyncModuleName));
+    var asyncModules = void 0;
+    if (scriptElement) {
+        asyncModules = JSON.parse(scriptElement.textContent);
+    }
+    if (asyncModules) {
+        return Promise.all(asyncModules.map(function (item) {
+            var curModule = _index.AsyncOperate.get(item);
+            var promise = curModule ? curModule.preload() : Promise.resolve();
+            return promise;
+        })).then(done);
+    }
+    return Promise.resolve();
+};
+
+var ready = function ready(done) {
+    var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        asyncChunkKey = _ref2.asyncChunkKey,
+        _ref2$chunkInArray = _ref2.chunkInArray,
+        chunkInArray = _ref2$chunkInArray === undefined ? 'webpackJsonp' : _ref2$chunkInArray;
 
     var scriptElement = document.getElementById((0, _util.getAsyncChunkKey)(asyncChunkKey));
     var asyncChunks = void 0;
@@ -57,4 +79,3 @@ var ready = function ready(done) {
     return Promise.resolve();
 };
 exports.default = ready;
-module.exports = exports['default'];

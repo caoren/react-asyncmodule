@@ -36,6 +36,47 @@ var customData = function customData() {
 };
 
 /*
+ * 存储所有 module, key 为 weakId
+ * {
+ *      [chunkName]: {
+ *          weakId,
+ *          chunkName,
+ *          preload
+ *      }
+ * }
+ */
+var ASYNCMODULE_ALLMODULE = {};
+export var AsyncOperate = {
+    get: function get(chunkName) {
+        return ASYNCMODULE_ALLMODULE[chunkName];
+    },
+    set: function set(data) {
+        var chunkName = data.chunkName;
+
+        if (ASYNCMODULE_ALLMODULE[chunkName]) {
+            return;
+        }
+        ASYNCMODULE_ALLMODULE[chunkName] = data;
+    },
+    remove: function remove(data) {
+        if (data) {
+            var weekId = data.weekId,
+                chunkName = data.chunkName;
+
+            if (__webpack_modules__[weekId]) {
+                // eslint-disable-line
+                __webpack_modules__[weekId] = undefined; // eslint-disable-line
+            }
+            ASYNCMODULE_ALLMODULE[chunkName] = undefined;
+        } else {
+            // eslint-disable-next-line max-len
+            Object.keys(ASYNCMODULE_ALLMODULE).forEach(function (item) {
+                return AsyncOperate.remove(ASYNCMODULE_ALLMODULE[item]);
+            });
+        }
+    }
+};
+/*
  * options
  * @load `function` return a `Promise` instance
  * @render `function` custom render
@@ -78,22 +119,27 @@ var Dueimport = function Dueimport() {
     var ErrorView = packComponent(error);
     var isDelay = typeof delay === 'number' && delay !== 0;
     var isTimeout = typeof timeout === 'number' && timeout !== 0;
+    var weekId = resolveWeak ? resolveWeak() : null;
+    var preload = function preload() {
+        var comp = syncModule(resolveWeak);
+        // console.log('=asyncmodule comp=', comp);
+        return Promise.resolve().then(function () {
+            if (comp) {
+                return comp;
+            }
+            return load();
+        });
+    };
+    AsyncOperate.set({
+        weekId: weekId,
+        chunkName: chunkName,
+        preload: preload
+    });
 
     var AsyncComponent = function (_Component) {
         _inherits(AsyncComponent, _Component);
 
         _createClass(AsyncComponent, null, [{
-            key: 'preload',
-            value: function preload() {
-                var comp = syncModule(resolveWeak);
-                return Promise.resolve().then(function () {
-                    if (comp) {
-                        return comp;
-                    }
-                    return load();
-                });
-            }
-        }, {
             key: 'preloadWeak',
             value: function preloadWeak() {
                 return syncModule(resolveWeak);
@@ -254,6 +300,7 @@ var Dueimport = function Dueimport() {
         return AsyncComponent;
     }(Component);
 
+    AsyncComponent.preload = preload;
     AsyncComponent.chunkName = chunkName;
 
     return withConsumer(AsyncComponent);

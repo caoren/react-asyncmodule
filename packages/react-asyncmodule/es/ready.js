@@ -1,10 +1,30 @@
-import { getAsyncChunkKey } from './util';
+import { AsyncOperate } from './index';
+import { getAsyncChunkKey, getAsyncModuleName } from './util';
+
+export var chunkReady = function chunkReady(done) {
+    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        asyncModuleName = _ref.asyncModuleName;
+
+    var scriptElement = document.getElementById(getAsyncModuleName(asyncModuleName));
+    var asyncModules = void 0;
+    if (scriptElement) {
+        asyncModules = JSON.parse(scriptElement.textContent);
+    }
+    if (asyncModules) {
+        return Promise.all(asyncModules.map(function (item) {
+            var curModule = AsyncOperate.get(item);
+            var promise = curModule ? curModule.preload() : Promise.resolve();
+            return promise;
+        })).then(done);
+    }
+    return Promise.resolve();
+};
 
 var ready = function ready(done) {
-    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-        asyncChunkKey = _ref.asyncChunkKey,
-        _ref$chunkInArray = _ref.chunkInArray,
-        chunkInArray = _ref$chunkInArray === undefined ? 'webpackJsonp' : _ref$chunkInArray;
+    var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        asyncChunkKey = _ref2.asyncChunkKey,
+        _ref2$chunkInArray = _ref2.chunkInArray,
+        chunkInArray = _ref2$chunkInArray === undefined ? 'webpackJsonp' : _ref2$chunkInArray;
 
     var scriptElement = document.getElementById(getAsyncChunkKey(asyncChunkKey));
     var asyncChunks = void 0;

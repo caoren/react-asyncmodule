@@ -11,6 +11,10 @@ var ASYNC_MODULE_CHUNKS = exports.ASYNC_MODULE_CHUNKS = '__ASYNC_MODULE_CHUNKS__
 var getAsyncChunkKey = exports.getAsyncChunkKey = function getAsyncChunkKey(key) {
     return key || ASYNC_MODULE_CHUNKS;
 };
+var ASYNC_MODULE_NAMES = exports.ASYNC_MODULE_NAMES = '__ASYNC_MODULE_NAMES__';
+var getAsyncModuleName = exports.getAsyncModuleName = function getAsyncModuleName(name) {
+    return name || ASYNC_MODULE_NAMES;
+};
 
 var shallowCopy = exports.shallowCopy = function shallowCopy(target) {
     if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== 'object') {

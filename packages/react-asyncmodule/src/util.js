@@ -1,6 +1,8 @@
 // utils
 export const ASYNC_MODULE_CHUNKS = '__ASYNC_MODULE_CHUNKS__';
 export const getAsyncChunkKey = key => key || ASYNC_MODULE_CHUNKS;
+export const ASYNC_MODULE_NAMES = '__ASYNC_MODULE_NAMES__';
+export const getAsyncModuleName = name => name || ASYNC_MODULE_NAMES;
 
 export const shallowCopy = (target, ...args) => {
     if (typeof target !== 'object') {

@@ -33,7 +33,9 @@
     "babel-preset-env": "^1.6.0",
     "babel-preset-stage-0": "^6.24.1",
     "cross-env": "^5.0.5",
-    "jest": "^23.5.0"
+    "jest": "^23.5.0",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.1"
   },
   "engines": {
     "node": ">= 6.2.0",

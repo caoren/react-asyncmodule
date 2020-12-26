@@ -32,8 +32,11 @@ options的属性
 | stats          | `object`         | -   | 必填，webpack 构建生成的 stats，推荐使用 [webpack-stats-plugin](https://github.com/FormidableLabs/webpack-stats-plugin)提取  |
 | outputPath     | `string`              |  stats 的 outputPath | 工程构建后 client 端的资源文件路径 |
 | entrypoints    | `string` or `array`   |  工程的 entry           | 入口文件  |
-| asyncChunkKey  | `string` |     -      |  client 端获取依赖 chunk 的 domid  |
+| asyncChunkKey  | `string` |     -      |  client 端获取依赖 chunk 的 domid，，默认为 react-asyncmodule 的 `__ASYNC_MODULE_CHUNKS__`  |
 | runtimeName    |  `string` or `array`  | 'runtime'  | 从入口文件分离出的 runtime js文件 |
+| isFederation   | `boolean`             | false    |  是否为 federation 场景  |
+| extraStats     | `object`              |   -  |   额外的 stats，格式和 stats 一致，一般为 federation remote 提供   |
+| asyncModuleName | `string`     |   -  |  client 依赖的 chunkName 的 domid，默认为 react-asyncmodule 的 `__ASYNC_MODULE_NAMES__`   |
 
 ```javascript
 const collect = createCollect({

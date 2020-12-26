@@ -5,6 +5,10 @@ export var ASYNC_MODULE_CHUNKS = '__ASYNC_MODULE_CHUNKS__';
 export var getAsyncChunkKey = function getAsyncChunkKey(key) {
     return key || ASYNC_MODULE_CHUNKS;
 };
+export var ASYNC_MODULE_NAMES = '__ASYNC_MODULE_NAMES__';
+export var getAsyncModuleName = function getAsyncModuleName(name) {
+    return name || ASYNC_MODULE_NAMES;
+};
 
 export var shallowCopy = function shallowCopy(target) {
     if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== 'object') {
