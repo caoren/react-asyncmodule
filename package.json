@@ -9,7 +9,8 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "test": "lerna run test",
-    "build": "lerna run build"
+    "build": "lerna run build",
+    "selfpulbish": "lerna publish —dist-tag beta --skip-git"
   },
   "dependencies": {}
 }

@@ -1,6 +1,6 @@
 {
   "name": "react-asyncmodule",
-  "version": "1.1.0",
+  "version": "1.2.0-beta.0",
   "description": "react async load component",
   "author": "caoren",
   "keywords": [
@@ -100,7 +100,7 @@
   },
   "dependencies": {
     "hoist-non-react-statics": "^3.3.0",
-    "react-asyncmodule-chunk": "^1.1.0"
+    "react-asyncmodule-chunk": "^1.2.0-beta.0"
   },
   "browserslist": [
     "iOS >= 8.0",
