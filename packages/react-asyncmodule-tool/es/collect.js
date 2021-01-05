@@ -5,7 +5,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 import { getAsyncChunkKey, getAsyncModuleName } from 'react-asyncmodule';
 import collectMap from './resourcemap';
 import fs from 'fs';
-import { filterJs, filterCss, mapScript, mapLink, mapStyle, uniq, joinPath, mapString } from './helper';
+import http from 'http';
+import { filterJs, filterCss, mapScript, mapLink, mapStyle, uniq, joinPath, mapString, clone, getHttpHeader } from './helper';
 
 // stats 中的 chunk 存在id(数字)和name(字符串)两种情况
 var getChunkByName = function getChunkByName(idx, chunks) {
@@ -19,9 +20,10 @@ var getChunkByName = function getChunkByName(idx, chunks) {
 };
 
 var connectNameGroupsFromChunks = function connectNameGroupsFromChunks(stats) {
-    var _stats$chunks = stats.chunks,
-        chunks = _stats$chunks === undefined ? [] : _stats$chunks,
-        namedChunkGroups = stats.namedChunkGroups;
+    var newstats = clone(stats);
+    var _newstats$chunks = newstats.chunks,
+        chunks = _newstats$chunks === undefined ? [] : _newstats$chunks,
+        namedChunkGroups = newstats.namedChunkGroups;
 
     Object.keys(namedChunkGroups).forEach(function (item) {
         // chunk 名和 asset 名不一定相等
@@ -66,7 +68,7 @@ var connectNameGroupsFromChunks = function connectNameGroupsFromChunks(stats) {
             namedChunkGroups[item].assets = itemAssets;
         }
     });
-    return stats;
+    return newstats;
 };
 /*
  * 根据 chunkName 获取对应的 assets
@@ -92,8 +94,7 @@ var Collect = function () {
             asyncChunkKey = option.asyncChunkKey,
             asyncModuleName = option.asyncModuleName,
             outputPath = option.outputPath,
-            _option$extraStats = option.extraStats,
-            extraStats = _option$extraStats === undefined ? {} : _option$extraStats,
+            extraStats = option.extraStats,
             _option$runtimeName = option.runtimeName,
             runtimeName = _option$runtimeName === undefined ? 'runtime' : _option$runtimeName,
             _option$isFederation = option.isFederation,
@@ -109,10 +110,10 @@ var Collect = function () {
         // 默认获取 stats 中 entrypoints 的第一个
         this.entrypoints = Array.isArray(entrypoints) ? entrypoints : [entrypoints || Object.keys(stats.entrypoints)[0]];
         this.runtimeName = Array.isArray(runtimeName) ? runtimeName : [runtimeName];
-        this.outputPath = outputPath || stats.outputPath;
+        this.outputPath = outputPath || this.stats.outputPath;
         // 根据获取对应的 assets
         this.assets = this.getAssetsByName();
-        this.assetsExtra = isFederation ? this.getAsstesByExtra(this.stats, extraStats) : [];
+        this.assetsExtra = isFederation && extraStats ? this.getAsstesByExtra(this.stats, extraStats) : [];
         this.assetsLite = this.getAssetsByName(isFederation);
     }
 
@@ -144,14 +145,14 @@ var Collect = function () {
                     return item.name;
                 }));
             }, []);
-            console.log('=deps=', deps);
+            // console.log('=deps=', deps);
             // 根据 deps 获取相应的 chunks
             var depsChunks = uniq(deps.reduce(function (prev, item) {
                 var curdDep = currentExposes[item];
-                console.log('=curdDep=', curdDep);
+                // console.log('=curdDep=', curdDep);
                 return prev.concat(curdDep);
             }, []));
-            console.log('=depsChunks=', depsChunks);
+            // console.log('=depsChunks=', depsChunks);
             // 在 extraStats 中获取 chunk 路径
             var styleAssets = depsChunks.reduce(function (prev, item) {
                 var _ref3 = getChunkByName(item, extraChunks) || {},
@@ -179,8 +180,8 @@ var Collect = function () {
             }, []).filter(filterCss).map(function (item) {
                 return '' + extraPath + item;
             });
-            console.log('=styleAssets=', styleAssets);
-            return styleAssets.map(mapLink);
+            // console.log('=styleAssets=', styleAssets);
+            return styleAssets;
         }
     }, {
         key: 'getAssetsByName',
@@ -269,12 +270,64 @@ var Collect = function () {
     }, {
         key: 'getInlineStyles',
         value: function getInlineStyles() {
-            var assets = this.assets;
+            var assets = this.assets,
+                isFederation = this.isFederation,
+                assetsExtra = this.assetsExtra;
 
             var mainLinks = assets.filter(function (item) {
                 return filterCss(item.url);
             });
             var cssMap = collectMap.getCSSMap();
+            if (isFederation) {
+                var totalLink = assetsExtra.concat(mainLinks);
+                var promises = totalLink.map(function (item) {
+                    var isStr = typeof item === 'string';
+                    var key = isStr ? item : item.path;
+                    if (cssMap && cssMap[key]) {
+                        return Promise.resolve({
+                            data: cssMap[key],
+                            url: isStr ? item : item.url
+                        });
+                    } else {
+                        return new Promise(function (resolve, reject) {
+                            if (isStr) {
+                                http.get(getHttpHeader(item), function (res) {
+                                    var rawData = '';
+                                    res.on('data', function (chunk) {
+                                        rawData += chunk;
+                                    });
+                                    res.on('end', function () {
+                                        try {
+                                            collectMap.setCSSMap(item, rawData);
+                                            resolve({ data: rawData, url: item });
+                                        } catch (e) {
+                                            reject(e);
+                                        }
+                                    });
+                                }).on('error', function (e) {
+                                    reject(e);
+                                });
+                            } else {
+                                fs.readFile(item.path, 'utf8', function (err, data) {
+                                    if (err) {
+                                        reject(err);
+                                        return;
+                                    }
+                                    collectMap.setCSSMap(item.path, data);
+                                    resolve({ data: data, url: item.url });
+                                });
+                            }
+                        });
+                    }
+                });
+                return Promise.all(promises).then(function (res) {
+                    return res.map(function (item) {
+                        return mapStyle(item.data, item.url);
+                    });
+                }).then(function (res) {
+                    return res.join('');
+                });
+            }
             if (cssMap) {
                 return mainLinks.map(function (item) {
                     return {
@@ -315,7 +368,8 @@ var Collect = function () {
             }).map(function (item) {
                 return mapLink(item.url);
             });
-            return this.assetsExtra.concat(mainLink).join('');
+            var extraLink = this.assetsExtra.map(mapLink);
+            return extraLink.concat(mainLink).join('');
         }
     }, {
         key: 'getScripts',
@@ -324,8 +378,7 @@ var Collect = function () {
                 _ref5$hasRuntime = _ref5.hasRuntime,
                 hasRuntime = _ref5$hasRuntime === undefined ? false : _ref5$hasRuntime;
 
-            var chunks = this.chunks,
-                assetsLite = this.assetsLite,
+            var assetsLite = this.assetsLite,
                 runtimeName = this.runtimeName,
                 isFederation = this.isFederation;
 
@@ -333,8 +386,6 @@ var Collect = function () {
                 return filterJs(item.url);
             }).filter(function (item) {
                 return hasRuntime ? true : runtimeName.indexOf(item.name) === -1;
-            }).filter(function (item) {
-                return chunks.indexOf(item.name) === -1;
             }).map(function (item) {
                 return mapScript(item.url, true);
             });

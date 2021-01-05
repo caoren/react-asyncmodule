@@ -1,6 +1,7 @@
 import { getAsyncChunkKey, getAsyncModuleName } from 'react-asyncmodule';
 import collectMap from './resourcemap';
 import fs from 'fs';
+import http from 'http';
 import {
     filterJs,
     filterCss,
@@ -9,7 +10,9 @@ import {
     mapStyle,
     uniq,
     joinPath,
-    mapString
+    mapString,
+    clone,
+    getHttpHeader
 } from './helper';
 
 // stats 中的 chunk 存在id(数字)和name(字符串)两种情况
@@ -22,7 +25,8 @@ const getChunkByName = (idx, chunks) => {
 }
 
 const connectNameGroupsFromChunks = (stats) => {
-    const { chunks = [], namedChunkGroups } = stats;
+    const newstats = clone(stats);
+    const { chunks = [], namedChunkGroups } = newstats;
     Object.keys(namedChunkGroups).forEach((item) => {
         // chunk 名和 asset 名不一定相等
         const itemChunks = namedChunkGroups[item].chunks;
@@ -61,7 +65,7 @@ const connectNameGroupsFromChunks = (stats) => {
             namedChunkGroups[item].assets = itemAssets;
         }
     });
-    return stats;
+    return newstats;
 }
 /*
  * 根据 chunkName 获取对应的 assets
@@ -83,7 +87,7 @@ class Collect {
             asyncChunkKey,
             asyncModuleName,
             outputPath,
-            extraStats = {},
+            extraStats,
             runtimeName = 'runtime',
             isFederation = false,
             stats = {}
@@ -96,10 +100,10 @@ class Collect {
         // 默认获取 stats 中 entrypoints 的第一个
         this.entrypoints = Array.isArray(entrypoints) ? entrypoints : [entrypoints || Object.keys(stats.entrypoints)[0]];
         this.runtimeName = Array.isArray(runtimeName) ? runtimeName : [runtimeName];
-        this.outputPath = outputPath || stats.outputPath;
+        this.outputPath = outputPath || this.stats.outputPath;
         // 根据获取对应的 assets
         this.assets = this.getAssetsByName();
-        this.assetsExtra = isFederation ? this.getAsstesByExtra(this.stats, extraStats) : [];
+        this.assetsExtra = isFederation && extraStats ? this.getAsstesByExtra(this.stats, extraStats) : [];
         this.assetsLite = this.getAssetsByName(isFederation);
     }
 
@@ -122,14 +126,14 @@ class Collect {
             const modules = remotesGraph[item];
             return prev.concat(modules.map(item => item.name));
         }, []);
-        console.log('=deps=', deps);
+        // console.log('=deps=', deps);
         // 根据 deps 获取相应的 chunks
         const depsChunks = uniq(deps.reduce((prev, item) => {
             const curdDep = currentExposes[item];
-            console.log('=curdDep=', curdDep);
+            // console.log('=curdDep=', curdDep);
             return prev.concat(curdDep);
         }, []));
-        console.log('=depsChunks=', depsChunks);
+        // console.log('=depsChunks=', depsChunks);
         // 在 extraStats 中获取 chunk 路径
         const styleAssets = depsChunks.reduce((prev, item) => {
             const { parents, files: curFiles } = getChunkByName(item, extraChunks) || {};
@@ -151,8 +155,8 @@ class Collect {
         }, [])
         .filter(filterCss)
         .map(item => `${extraPath}${item}`);
-        console.log('=styleAssets=', styleAssets);
-        return styleAssets.map(mapLink);
+        // console.log('=styleAssets=', styleAssets);
+        return styleAssets;
     }
 
     getAssetsByName(isFederation) {
@@ -218,10 +222,54 @@ class Collect {
     }
 
     getInlineStyles() {
-        const { assets } = this;
+        const { assets, isFederation, assetsExtra } = this;
         const mainLinks = assets
             .filter(item => filterCss(item.url));
         const cssMap = collectMap.getCSSMap();
+        if (isFederation) {
+            const totalLink = assetsExtra.concat(mainLinks);
+            const promises = totalLink.map((item) => {
+                const isStr = typeof item === 'string';
+                const key = isStr ? item : item.path;
+                if (cssMap && cssMap[key]) {
+                    return Promise.resolve({
+                        data: cssMap[key],
+                        url: isStr ? item : item.url
+                    });
+                } else {
+                    return new Promise((resolve, reject) => {
+                        if (isStr) {
+                            http.get(getHttpHeader(item), (res) => {
+                                let rawData = '';
+                                res.on('data', (chunk) => { rawData += chunk; });
+                                res.on('end', () => {
+                                    try {
+                                        collectMap.setCSSMap(item, rawData);
+                                        resolve({ data: rawData, url: item });
+                                    } catch (e) {
+                                        reject(e);
+                                    }
+                                });
+                            }).on('error', (e) => {
+                                reject(e);
+                            });
+                        } else {
+                            fs.readFile(item.path, 'utf8', (err, data) => {
+                                if (err) {
+                                    reject(err)
+                                    return;
+                                }
+                                collectMap.setCSSMap(item.path, data);
+                                resolve({ data, url: item.url });
+                            });
+                        }
+                    });
+                }
+            });
+            return Promise.all(promises)
+                .then(res => res.map(item => mapStyle(item.data, item.url)))
+                .then(res => res.join(''));
+        }
         if (cssMap) {
             return mainLinks.map((item) => {
                 return {
@@ -250,15 +298,15 @@ class Collect {
         const mainLink = assets
             .filter(item => filterCss(item.url))
             .map(item => mapLink(item.url));
-        return this.assetsExtra.concat(mainLink).join('');
+        const extraLink = this.assetsExtra.map(mapLink);
+        return extraLink.concat(mainLink).join('');
     }
 
     getScripts({ hasRuntime = false } = {}) {
-        const { chunks, assetsLite, runtimeName, isFederation } = this;
+        const { assetsLite, runtimeName, isFederation } = this;
         const mainScript = assetsLite
             .filter(item => filterJs(item.url))
             .filter(item => hasRuntime ? true : runtimeName.indexOf(item.name) === -1)
-            .filter(item => chunks.indexOf(item.name) === -1)
             .map(item => mapScript(item.url, true));
         return [isFederation ? this.getAsyncModules() : this.getAsyncChunks()].concat(mainScript).join('');
     }

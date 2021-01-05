@@ -48,3 +48,35 @@ export const joinPath = (path, filename) => {
     const gap = path.slice(-1) === '/' ? '' : '/';
     return `${path}${gap}${filename}`;
 }
+
+const httpReg = /^http(s)?\:/i; // eslint-disable-line
+// 添加 http
+export const getHttpHeader = (url) => {
+    if (httpReg.test(url)) {
+        return url;
+    }
+    return `http:${url}`;
+}
+
+const isObject = v => typeof v === 'object' && v !== null;
+const isArray =  obj => obj instanceof Array;
+// clone object
+export const clone = (obj) => {
+    const hasObj = isObject(obj);
+    const hasArr = isArray(obj);
+    if (!hasObj && !hasArr) {
+        return obj;
+    }
+    let newobj = hasArr ? [] : {};
+    const arr = hasArr ? obj : Object.keys(obj);
+    arr.forEach((item, idx) => {
+        const curitem = hasArr ? item : obj[item];
+        const val = isObject(curitem) || isArray(curitem) ? clone(curitem) : curitem;
+        if (hasArr) {
+            newobj[idx] = val
+        } else {
+            newobj[item] = val;
+        }
+    });
+    return newobj; 
+}

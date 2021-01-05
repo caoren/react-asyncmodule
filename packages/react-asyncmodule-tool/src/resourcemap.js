@@ -44,6 +44,10 @@ const collectMap = function tmpMap() {
         getCSSMap() {
             return cssMap;
         },
+        setCSSMap(key, data) {
+            cssMap = cssMap || {};
+            cssMap[key] = data;
+        },
         prefetchCss(option) {
             const rsMap = new ResourceMap(option);
             const stylesPromises = rsMap.getStyle().map((item) => {

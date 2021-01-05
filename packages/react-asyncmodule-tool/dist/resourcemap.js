@@ -75,6 +75,10 @@ var collectMap = function tmpMap() {
         getCSSMap: function getCSSMap() {
             return cssMap;
         },
+        setCSSMap: function setCSSMap(key, data) {
+            cssMap = cssMap || {};
+            cssMap[key] = data;
+        },
         prefetchCss: function prefetchCss(option) {
             var rsMap = new ResourceMap(option);
             var stylesPromises = rsMap.getStyle().map(function (item) {

@@ -65,3 +65,39 @@ export var joinPath = function joinPath(path, filename) {
     var gap = path.slice(-1) === '/' ? '' : '/';
     return '' + path + gap + filename;
 };
+
+var httpReg = /^http(s)?\:/i; // eslint-disable-line
+// 添加 http
+export var getHttpHeader = function getHttpHeader(url) {
+    if (httpReg.test(url)) {
+        return url;
+    }
+    return 'http:' + url;
+};
+
+var isObject = function isObject(v) {
+    return (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === 'object' && v !== null;
+};
+var isArray = function isArray(obj) {
+    return obj instanceof Array;
+};
+// clone object
+export var clone = function clone(obj) {
+    var hasObj = isObject(obj);
+    var hasArr = isArray(obj);
+    if (!hasObj && !hasArr) {
+        return obj;
+    }
+    var newobj = hasArr ? [] : {};
+    var arr = hasArr ? obj : Object.keys(obj);
+    arr.forEach(function (item, idx) {
+        var curitem = hasArr ? item : obj[item];
+        var val = isObject(curitem) || isArray(curitem) ? clone(curitem) : curitem;
+        if (hasArr) {
+            newobj[idx] = val;
+        } else {
+            newobj[item] = val;
+        }
+    });
+    return newobj;
+};
