@@ -27,15 +27,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// stats 中的 chunk 存在id(数字)和name(字符串)两种情况
+// stats 中的 chunk 存在id(数字)和name(字符串)两种情况，判断 id 的值最准确
 var getChunkByName = function getChunkByName(idx, chunks) {
-    if (typeof idx === 'string') {
-        var res = chunks.filter(function (item) {
-            return item.id === idx;
-        });
-        return res[0];
-    }
-    return chunks[idx];
+    var res = chunks.filter(function (item) {
+        return item.id === idx;
+    });
+    return res[0];
 };
 
 var connectNameGroupsFromChunks = function connectNameGroupsFromChunks(stats) {
@@ -78,13 +75,25 @@ var connectNameGroupsFromChunks = function connectNameGroupsFromChunks(stats) {
         });
         if (insChunks.length > 0) {
             // chunk 间的 parents 可能存在重复，加上去重
-            itemChunks.unshift.apply(itemChunks, (0, _helper.uniq)(insChunks));
+            var uniqInsChunks = (0, _helper.uniq)(insChunks);
+            uniqInsChunks.forEach(function (item) {
+                // itemChunks 不存在相同的 item
+                if (itemChunks.indexOf(item) === -1) {
+                    itemChunks.unshift(item);
+                }
+            });
             namedChunkGroups[item].chunks = itemChunks;
         }
         if (insAssets.length > 0) {
             // 同上
-            itemAssets.unshift.apply(itemAssets, (0, _helper.uniq)(insAssets));
-            namedChunkGroups[item].assets = itemAssets;
+            var uniqInsAssets = (0, _helper.uniq)(insAssets);
+            uniqInsAssets.forEach(function (item) {
+                // itemChunks 不存在相同的 item
+                if (itemAssets.indexOf(item) === -1) {
+                    itemAssets.unshift(item);
+                }
+            });
+            namedChunkGroups[item].assets = (0, _helper.uniqAssets)(itemAssets);
         }
     });
     return newstats;
@@ -152,26 +161,26 @@ var Collect = function () {
         key: 'getAsstesByExtra',
         value: function getAsstesByExtra(stats, extraStats) {
             var chunks = this.chunks;
-            var remotesGraph = stats.remotesGraph;
-            var currentExposes = extraStats.currentExposes,
+            var remotesMap = stats.remotesMap;
+            var exposesMap = extraStats.exposesMap,
                 extraChunks = extraStats.chunks,
                 extraPath = extraStats.publicPath;
-            // 根据 chunks 从 remotesGraph 获取依赖的 federation module
+            // 根据 chunks 从 remotesMap 获取依赖的 federation module
 
-            var deps = chunks.reduce(function (prev, item) {
-                var modules = remotesGraph[item];
+            var deps = remotesMap ? chunks.reduce(function (prev, item) {
+                var modules = remotesMap[item];
                 return prev.concat(modules.map(function (item) {
                     return item.name;
                 }));
-            }, []);
-            // console.log('=deps=', deps);
+            }, []) : [];
+            if (deps.length === 0) {
+                return deps;
+            }
             // 根据 deps 获取相应的 chunks
             var depsChunks = (0, _helper.uniq)(deps.reduce(function (prev, item) {
-                var curdDep = currentExposes[item];
-                // console.log('=curdDep=', curdDep);
+                var curdDep = exposesMap ? exposesMap[item] : [];
                 return prev.concat(curdDep);
             }, []));
-            // console.log('=depsChunks=', depsChunks);
             // 在 extraStats 中获取 chunk 路径
             var styleAssets = depsChunks.reduce(function (prev, item) {
                 var _ref3 = getChunkByName(item, extraChunks) || {},
@@ -199,7 +208,6 @@ var Collect = function () {
             }, []).filter(_helper.filterCss).map(function (item) {
                 return '' + extraPath + item;
             });
-            // console.log('=styleAssets=', styleAssets);
             return styleAssets;
         }
     }, {
@@ -235,10 +243,10 @@ var Collect = function () {
             var realRuntimeName = [];
             entrypoints.forEach(function (item, n) {
                 var curchunks = namedChunkGroups[item].chunks;
-                // 只保留js，过滤其余的 css 或者 map 等
-                var curassets = namedChunkGroups[item].assets.map(_helper.mapString).filter(_helper.filterJs).map(function (item) {
+                // 只保留js，过滤其余的 css 或者 map 等, dev 时存在 hot-update.js，需要过滤相同 chunk
+                var curassets = (0, _helper.uniq)(namedChunkGroups[item].assets.map(_helper.mapString).filter(_helper.filterJs).map(function (item) {
                     return item.split('.')[0];
-                });
+                }));
                 var renpIdx = curassets.findIndex(function (as) {
                     return as === item;
                 });
@@ -298,7 +306,7 @@ var Collect = function () {
             });
             var cssMap = _resourcemap2.default.getCSSMap();
             if (isFederation) {
-                var totalLink = assetsExtra.concat(mainLinks);
+                var totalLink = mainLinks.concat(assetsExtra);
                 var promises = totalLink.map(function (item) {
                     var isStr = typeof item === 'string';
                     var key = isStr ? item : item.path;
@@ -311,17 +319,20 @@ var Collect = function () {
                         return new Promise(function (resolve, reject) {
                             if (isStr) {
                                 _http2.default.get((0, _helper.getHttpHeader)(item), function (res) {
+                                    var statusCode = res.statusCode;
+
+                                    if (statusCode < 200 || statusCode >= 300) {
+                                        reject(new Error('request failed'));
+                                        res.resume();
+                                        return;
+                                    }
                                     var rawData = '';
                                     res.on('data', function (chunk) {
                                         rawData += chunk;
                                     });
                                     res.on('end', function () {
-                                        try {
-                                            _resourcemap2.default.setCSSMap(item, rawData);
-                                            resolve({ data: rawData, url: item });
-                                        } catch (e) {
-                                            reject(e);
-                                        }
+                                        _resourcemap2.default.setCSSMap(item, rawData);
+                                        resolve({ data: rawData, url: item });
                                     });
                                 }).on('error', function (e) {
                                     reject(e);
@@ -388,7 +399,7 @@ var Collect = function () {
                 return (0, _helper.mapLink)(item.url);
             });
             var extraLink = this.assetsExtra.map(_helper.mapLink);
-            return extraLink.concat(mainLink).join('');
+            return mainLink.concat(extraLink).join('');
         }
     }, {
         key: 'getScripts',

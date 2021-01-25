@@ -9,19 +9,17 @@ import {
     mapLink,
     mapStyle,
     uniq,
+    uniqAssets,
     joinPath,
     mapString,
     clone,
     getHttpHeader
 } from './helper';
 
-// stats 中的 chunk 存在id(数字)和name(字符串)两种情况
+// stats 中的 chunk 存在id(数字)和name(字符串)两种情况，判断 id 的值最准确
 const getChunkByName = (idx, chunks) => {
-    if (typeof idx === 'string') {
-        const res = chunks.filter(item => item.id === idx);
-        return res[0];
-    }
-    return chunks[idx];
+    const res = chunks.filter(item => item.id === idx);
+    return res[0];
 }
 
 const connectNameGroupsFromChunks = (stats) => {
@@ -56,13 +54,25 @@ const connectNameGroupsFromChunks = (stats) => {
         });
         if (insChunks.length > 0) {
             // chunk 间的 parents 可能存在重复，加上去重
-            itemChunks.unshift.apply(itemChunks, uniq(insChunks))
+            const uniqInsChunks = uniq(insChunks);
+            uniqInsChunks.forEach((item) => {
+                // itemChunks 不存在相同的 item
+                if (itemChunks.indexOf(item) === -1) {
+                    itemChunks.unshift(item);
+                }
+            });
             namedChunkGroups[item].chunks = itemChunks;
         }
         if (insAssets.length > 0) {
             // 同上
-            itemAssets.unshift.apply(itemAssets, uniq(insAssets));
-            namedChunkGroups[item].assets = itemAssets;
+            const uniqInsAssets = uniq(insAssets);
+            uniqInsAssets.forEach((item) => {
+                // itemChunks 不存在相同的 item
+                if (itemAssets.indexOf(item) === -1) {
+                    itemAssets.unshift(item);
+                }
+            });
+            namedChunkGroups[item].assets = uniqAssets(itemAssets);
         }
     });
     return newstats;
@@ -119,21 +129,21 @@ class Collect {
 
     getAsstesByExtra(stats, extraStats) {
         const { chunks } = this;
-        const { remotesGraph } = stats;
-        const { currentExposes, chunks: extraChunks, publicPath: extraPath } = extraStats;
-        // 根据 chunks 从 remotesGraph 获取依赖的 federation module
-        const deps = chunks.reduce((prev, item) => {
-            const modules = remotesGraph[item];
+        const { remotesMap } = stats;
+        const { exposesMap, chunks: extraChunks, publicPath: extraPath } = extraStats;
+        // 根据 chunks 从 remotesMap 获取依赖的 federation module
+        const deps = remotesMap ? chunks.reduce((prev, item) => {
+            const modules = remotesMap[item];
             return prev.concat(modules.map(item => item.name));
-        }, []);
-        // console.log('=deps=', deps);
+        }, []) : [];
+        if (deps.length === 0) {
+            return deps;
+        }
         // 根据 deps 获取相应的 chunks
         const depsChunks = uniq(deps.reduce((prev, item) => {
-            const curdDep = currentExposes[item];
-            // console.log('=curdDep=', curdDep);
+            const curdDep = exposesMap ? exposesMap[item] : [];
             return prev.concat(curdDep);
         }, []));
-        // console.log('=depsChunks=', depsChunks);
         // 在 extraStats 中获取 chunk 路径
         const styleAssets = depsChunks.reduce((prev, item) => {
             const { parents, files: curFiles } = getChunkByName(item, extraChunks) || {};
@@ -155,7 +165,6 @@ class Collect {
         }, [])
         .filter(filterCss)
         .map(item => `${extraPath}${item}`);
-        // console.log('=styleAssets=', styleAssets);
         return styleAssets;
     }
 
@@ -179,11 +188,11 @@ class Collect {
         const realRuntimeName = [];
         entrypoints.forEach((item, n) => {
             const curchunks = namedChunkGroups[item].chunks;
-            // 只保留js，过滤其余的 css 或者 map 等
-            const curassets = namedChunkGroups[item].assets
+            // 只保留js，过滤其余的 css 或者 map 等, dev 时存在 hot-update.js，需要过滤相同 chunk
+            const curassets = uniq(namedChunkGroups[item].assets
                 .map(mapString)
                 .filter(filterJs)
-                .map(item => item.split('.')[0]);
+                .map(item => item.split('.')[0]));
             const renpIdx = curassets.findIndex(as => as === item);
             if (renpIdx > -1) {
                 realEnterpoints.push(curchunks[renpIdx]);
@@ -227,7 +236,7 @@ class Collect {
             .filter(item => filterCss(item.url));
         const cssMap = collectMap.getCSSMap();
         if (isFederation) {
-            const totalLink = assetsExtra.concat(mainLinks);
+            const totalLink = mainLinks.concat(assetsExtra);
             const promises = totalLink.map((item) => {
                 const isStr = typeof item === 'string';
                 const key = isStr ? item : item.path;
@@ -240,15 +249,17 @@ class Collect {
                     return new Promise((resolve, reject) => {
                         if (isStr) {
                             http.get(getHttpHeader(item), (res) => {
+                                const { statusCode } = res;
+                                if (statusCode < 200 || statusCode >= 300) {
+                                    reject(new Error('request failed'));
+                                    res.resume();
+                                    return;
+                                }
                                 let rawData = '';
                                 res.on('data', (chunk) => { rawData += chunk; });
                                 res.on('end', () => {
-                                    try {
-                                        collectMap.setCSSMap(item, rawData);
-                                        resolve({ data: rawData, url: item });
-                                    } catch (e) {
-                                        reject(e);
-                                    }
+                                    collectMap.setCSSMap(item, rawData);
+                                    resolve({ data: rawData, url: item });
                                 });
                             }).on('error', (e) => {
                                 reject(e);
@@ -299,7 +310,7 @@ class Collect {
             .filter(item => filterCss(item.url))
             .map(item => mapLink(item.url));
         const extraLink = this.assetsExtra.map(mapLink);
-        return extraLink.concat(mainLink).join('');
+        return mainLink.concat(extraLink).join('');
     }
 
     getScripts({ hasRuntime = false } = {}) {

@@ -35,7 +35,10 @@ const customData = (data = {}, chunkName) => data[chunkName];
 const ASYNCMODULE_ALLMODULE = {};
 export const AsyncOperate = {
     get(chunkName) {
-        return ASYNCMODULE_ALLMODULE[chunkName];
+        if (chunkName) {
+            return ASYNCMODULE_ALLMODULE[chunkName];
+        }
+        return ASYNCMODULE_ALLMODULE;
     },
     set(data) {
         const {
@@ -46,16 +49,20 @@ export const AsyncOperate = {
         }
         ASYNCMODULE_ALLMODULE[chunkName] = data;
     },
+    // 只清除挂载在 webpack 上的 module
     remove(data) {
         if (data) {
-            const { weekId, chunkName } = data;
+            const { weekId } = data;
             if (__webpack_modules__[weekId]) { // eslint-disable-line
                 __webpack_modules__[weekId] = undefined; // eslint-disable-line
             }
-            ASYNCMODULE_ALLMODULE[chunkName] = undefined;
         } else {
-            // eslint-disable-next-line max-len
-            Object.keys(ASYNCMODULE_ALLMODULE).forEach(item => AsyncOperate.remove(ASYNCMODULE_ALLMODULE[item]));
+            Object.keys(ASYNCMODULE_ALLMODULE).forEach((item) => {
+                const curItem = ASYNCMODULE_ALLMODULE[item];
+                if (curItem) {
+                    AsyncOperate.remove(curItem);
+                }
+            });
         }
     }
 };
@@ -105,7 +112,6 @@ const Dueimport = (option = {}) => {
     const weekId = resolveWeak ? resolveWeak() : null;
     const preload = () => {
         const comp = syncModule(resolveWeak);
-        // console.log('=asyncmodule comp=', comp);
         return Promise.resolve().then(() => {
             if (comp) {
                 return comp;

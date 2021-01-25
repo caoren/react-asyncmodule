@@ -1,6 +1,5 @@
 /* eslint-disable */
 import React, { Component } from 'react';
-import { act } from 'react-dom/test-utils';
 import { configure, shallow, render, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import AsyncChunk from 'react-asyncmodule-chunk';
@@ -67,6 +66,7 @@ describe('AsyncModule memory', () => {
     afterEach(() => {
         delete global.AsyncCommon;
     });
+
     test('client found', (done) => {
         expect.assertions(5);
         const mockLoaded = jest.fn(({ component, chunkName, isServer }) => {
@@ -90,6 +90,7 @@ describe('AsyncModule memory', () => {
         expect(app.html()).toBe('<div class="m-home">首页</div>');
         expect(mockLoaded).toHaveBeenCalledTimes(1);
     });
+
     test('client timeout', async () => {
         const AsyncComponent = AsyncModule({
             loading: <Loading />,
@@ -105,6 +106,7 @@ describe('AsyncModule memory', () => {
         app.update();
         expect(app.html()).toBe('<div class="m-error">加载失败</div>');
     });
+
     test('client not found 2', async () => {
         const mockLoaded = jest.fn();
         const ViewSecond = AsyncCommon({
@@ -132,6 +134,7 @@ describe('AsyncModule memory', () => {
         app.update();
         expect(app.html()).toBe('<div class="m-error">加载失败</div>');
     });
+
     test('client found error try', async () => {
         expect.assertions(1);
         const ViewFouth = AsyncCommon({
@@ -147,6 +150,7 @@ describe('AsyncModule memory', () => {
 });
 
 describe('AsyncModule static method', () => {
+
     test('preload sync succ', (done) => {
         const AsyncComponent = AsyncModule({
             load: loadcomp,
@@ -160,6 +164,7 @@ describe('AsyncModule static method', () => {
             done();
         });
     });
+
     test('preload async succ', (done) => {
         const AsyncComponent = AsyncModule({
             load: loadcomp,
@@ -173,6 +178,7 @@ describe('AsyncModule static method', () => {
             done();
         });
     });
+
     test('preloadWeak succ', () => {
         const AsyncComponent = AsyncModule({
             load: loadcomp,
@@ -183,6 +189,7 @@ describe('AsyncModule static method', () => {
         const comp = AsyncComponent.preloadWeak();
         expect(comp).toEqual(Home);
     });
+
     test('preloadWeak fail', () => {
         const AsyncComponent = AsyncModule({
             load: loadcomp,
@@ -207,6 +214,7 @@ describe('AsyncModule once', () => {
         const app = shallow(<SyncCom />);
         expect(app.html()).toBe('<div class="m-home">首页</div>');
     });
+
     test('param not load', () => {
         const SyncCom = AsyncModule({
             loading: <Loading />,
@@ -239,6 +247,7 @@ describe('AsyncModule error', () => {
         app.update();
         expect(app.html()).toBe('<div class="m-home">首页</div>');
     });
+
     test('error null', async () => {
         const SyncCom = AsyncModule({
             loading: Loadtm,
@@ -262,6 +271,7 @@ describe('AsyncChunk', () => {
         error: <ErrorView />,
         chunk: () => 'testa'
     });
+
     test('report', () => {
         const modules = [];
         const report = (module) => modules.push(module);
@@ -275,6 +285,7 @@ describe('AsyncChunk', () => {
         expect(modules[0].testProperty).toBe('test');
         expect(modules[0].getData).toBeInstanceOf(Function);
     });
+    
     test('receiveData', () => {
         const receiveData = { testa:  { c: 1 } };
         const app = mount(

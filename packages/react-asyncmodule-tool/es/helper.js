@@ -60,6 +60,38 @@ export var uniq = function uniq(arr) {
     return narr;
 };
 
+// 获取资源链接头和尾部组合, 如：app_css
+var getFirstAndEnd = function getFirstAndEnd(asset) {
+    var arr = asset.split('.');
+    return arr[0] + '_' + arr[arr.length - 1];
+};
+// 处理同 chunk 的多个资源文件, 主要处理 hmr 的场景
+export var uniqAssets = function uniqAssets(arr) {
+    // 获取资源名, 区分后缀
+    var narr = arr.map(function (item) {
+        return getFirstAndEnd(item);
+    });
+    var obj = {};
+    var resArr = [];
+    narr.forEach(function (item, i) {
+        var curItem = obj[item];
+        if (!curItem) {
+            resArr.push(item);
+            obj[item] = arr[i];
+        } else {
+            var itemurl = arr[i].split('.');
+            var prevurl = curItem.split('.');
+            // 取短的
+            if (prevurl.length > itemurl.length) {
+                obj[item] = arr[i];
+            }
+        }
+    });
+    return resArr.map(function (item) {
+        return obj[item];
+    });
+};
+
 // 合并2个路径
 export var joinPath = function joinPath(path, filename) {
     var gap = path.slice(-1) === '/' ? '' : '/';
