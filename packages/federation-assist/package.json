@@ -1,0 +1,53 @@
+{
+  "name": "asyncmodule-federation-webpack-plugin",
+  "version": "1.0.0",
+  "description": "Federation related webpack plugin",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "BABEL_ENV=commonjs babel-node demo/run.js --require babel-core/register",
+    "js:commonjs": "BABEL_ENV=commonjs babel src/ --out-dir dist/",
+    "test": "jest",
+    "build": "npm run js:commonjs"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "moduleFileExtensions": [
+      "js",
+      "json"
+    ],
+    "testMatch": [
+      "<rootDir>/test/*.js"
+    ],
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@https://github.com/caoren/react-asyncmodule.git"
+  },
+  "keywords": [
+    "webpack",
+    "plugin",
+    "federation"
+  ],
+  "author": "caoren",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.4",
+    "@babel/polyfill": "^7.11.5",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/preset-react": "^7.8.3",
+    "@babel/preset-typescript": "^7.12.0",
+    "@babel/register": "^7.8.3",
+    "babel-eslint": "^10.0.3",
+    "babel-jest": "^26.6.0",
+    "babel-loader": "^8.0.6",
+    "babel-plugin-add-module-exports": "^1.0.4",
+    "babel-preset-collection": "^0.1.0"
+  },
+  "dependencies": {
+    "lodash.uniq": "^4.5.0"
+  }
+}

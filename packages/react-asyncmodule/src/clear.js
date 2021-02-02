@@ -1,7 +1,7 @@
 import { AsyncOperate } from './asmod';
 
-const clearWebpackCache = (clientStats = {}) => {
-    const { remotesRelatedDepends = [], remotesMap = {} } = clientStats;
+const clearWebpackCache = (serverStats = {}) => {
+    const { remotesRelatedDepends = [], remotesMap = {} } = serverStats;
     if (__webpack_require__) { // eslint-disable-line
         remotesRelatedDepends.forEach((item) => {
             if (__webpack_require__.mcache[item]) { // eslint-disable-line

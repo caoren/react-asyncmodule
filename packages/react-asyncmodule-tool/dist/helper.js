@@ -68,11 +68,13 @@ var uniq = exports.uniq = function uniq(arr) {
 
 // 获取资源链接头和尾部组合, 如：app_css
 var getFirstAndEnd = function getFirstAndEnd(asset) {
-    var arr = asset.split('.');
+    var flatAsset = mapString(asset);
+    var arr = flatAsset.split('.');
     return arr[0] + '_' + arr[arr.length - 1];
 };
 // 处理同 chunk 的多个资源文件, 主要处理 hmr 的场景
 var uniqAssets = exports.uniqAssets = function uniqAssets(arr) {
+    // webpack5 assets 为对象 { name: 'app.js' }
     // 获取资源名, 区分后缀
     var narr = arr.map(function (item) {
         return getFirstAndEnd(item);
@@ -85,8 +87,8 @@ var uniqAssets = exports.uniqAssets = function uniqAssets(arr) {
             resArr.push(item);
             obj[item] = arr[i];
         } else {
-            var itemurl = arr[i].split('.');
-            var prevurl = curItem.split('.');
+            var itemurl = mapString(arr[i]).split('.');
+            var prevurl = mapString(curItem).split('.');
             // 取短的
             if (prevurl.length > itemurl.length) {
                 obj[item] = arr[i];

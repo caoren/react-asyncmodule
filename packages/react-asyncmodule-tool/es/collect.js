@@ -69,8 +69,10 @@ var connectNameGroupsFromChunks = function connectNameGroupsFromChunks(stats) {
             // 同上
             var uniqInsAssets = uniq(insAssets);
             uniqInsAssets.forEach(function (item) {
-                // itemChunks 不存在相同的 item
-                if (itemAssets.indexOf(item) === -1) {
+                // webpack5 的 assets 存在对象, { "name": 'app.js' }，先抹平
+                var flatItemAssets = itemAssets.map(mapString);
+                // itemAssets 不存在相同的 item, 则添加
+                if (flatItemAssets.indexOf(mapString(item)) === -1) {
                     itemAssets.unshift(item);
                 }
             });
@@ -218,7 +220,7 @@ var Collect = function () {
                 runtimeName = this.runtimeName,
                 isFederation = this.isFederation;
             var namedChunkGroups = this.stats.namedChunkGroups;
-            // chunks可能是数字，不是字符串，故需要通过 assets 来获取对应的 chunk
+            // chunks可能是数字，不是字符串，故需要通过 assets 所在的数组下标来获取对应的 chunk
 
             var realEnterpoints = [];
             var realRuntimeName = [];

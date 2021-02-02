@@ -1,6 +1,6 @@
 {
   "name": "react-asyncmodule-tool",
-  "version": "1.2.0-beta.3",
+  "version": "1.2.0-beta.4",
   "description": "react asyncmodule tool",
   "author": "caoren",
   "sideEffects": false,
@@ -49,14 +49,14 @@
       "js"
     ],
     "testMatch": [
-      "<rootDir>/test/*.js?(x)"
+      "<rootDir>/test/*.test.js?(x)"
     ],
     "transform": {
       "^.+\\.js$": "babel-jest"
     }
   },
   "dependencies": {
-    "react-asyncmodule": "^1.2.0-beta.3"
+    "react-asyncmodule": "^1.2.0-beta.4"
   },
   "gitHead": "e704bf27d8842530793674cac7c39e6dfcf83d89"
 }

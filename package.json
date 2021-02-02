@@ -10,7 +10,7 @@
     "bootstrap": "lerna bootstrap",
     "test": "lerna run test",
     "build": "lerna run build",
-    "selfpublish": "lerna run build && lerna publish —dist-tag beta --skip-git"
+    "selfpublish": "lerna run build && lerna publish --npm-tag=beta --skip-git"
   },
   "dependencies": {}
 }

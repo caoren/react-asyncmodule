@@ -1,11 +1,11 @@
 import { AsyncOperate } from './asmod';
 
 var clearWebpackCache = function clearWebpackCache() {
-    var clientStats = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    var _clientStats$remotesR = clientStats.remotesRelatedDepends,
-        remotesRelatedDepends = _clientStats$remotesR === undefined ? [] : _clientStats$remotesR,
-        _clientStats$remotesM = clientStats.remotesMap,
-        remotesMap = _clientStats$remotesM === undefined ? {} : _clientStats$remotesM;
+    var serverStats = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var _serverStats$remotesR = serverStats.remotesRelatedDepends,
+        remotesRelatedDepends = _serverStats$remotesR === undefined ? [] : _serverStats$remotesR,
+        _serverStats$remotesM = serverStats.remotesMap,
+        remotesMap = _serverStats$remotesM === undefined ? {} : _serverStats$remotesM;
 
     if (__webpack_require__) {
         // eslint-disable-line
