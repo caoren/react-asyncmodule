@@ -115,9 +115,9 @@ class FederationRuntimePlugin extends SourceBase {
                                 } catch (e) {
                                     reject(e);
                                 }
-                            }).on('error', function(e) {
-                                reject(e);
                             });
+                        }).on('error', function(e) {
+                            reject(e);
                         });
                     });
                 `;

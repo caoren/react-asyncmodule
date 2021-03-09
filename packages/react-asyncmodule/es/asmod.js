@@ -90,6 +90,7 @@ export var AsyncOperate = {
  * @error `React Element`
  * @delay `number` ms, loading view delay display
  * @timeout `number` ms, load timeout time
+ * @onBeforeRender before component render callback
  */
 var DEFAULTOPTIONS = {
     load: null,
@@ -99,7 +100,8 @@ var DEFAULTOPTIONS = {
     error: null,
     delay: DELAY,
     timeout: TIMEOUT,
-    onModuleLoaded: null
+    onModuleLoaded: null,
+    onBeforeRender: null
 };
 var Dueimport = function Dueimport() {
     var option = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -111,7 +113,8 @@ var Dueimport = function Dueimport() {
         timeout = option.timeout,
         resolveWeak = option.resolveWeak,
         chunk = option.chunk,
-        onModuleLoaded = option.onModuleLoaded;
+        onModuleLoaded = option.onModuleLoaded,
+        onBeforeRender = option.onBeforeRender;
 
     if (!load) {
         return null;
@@ -179,6 +182,7 @@ var Dueimport = function Dueimport() {
             if (!comp) {
                 _this.loadComp();
             } else {
+                _this.beforeRenderCb(comp);
                 _this.loadedCb(comp, isServer());
             }
             return _this;
@@ -195,6 +199,13 @@ var Dueimport = function Dueimport() {
                         component: comp,
                         setState: this.changeState
                     });
+                }
+            }
+        }, {
+            key: 'beforeRenderCb',
+            value: function beforeRenderCb(comp) {
+                if (onBeforeRender) {
+                    onBeforeRender(comp);
                 }
             }
         }, {
@@ -248,6 +259,7 @@ var Dueimport = function Dueimport() {
                 load().then(function (component) {
                     _this2.clearTime();
                     var comp = getModule(component);
+                    _this2.beforeRenderCb(comp);
                     _this2.changeState({
                         comp: comp,
                         request: false,
