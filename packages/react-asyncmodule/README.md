@@ -122,7 +122,7 @@ const List = AsyncModule({
 
 ### onModuleLoaded
 
-module加载完执行，返回 1 个 options 对象, 包含 5 个属性，详细如下。
+component 加载完执行，返回 1 个 options 对象, 包含 5 个属性，详细如下。
 
 * component, 当前module
 * chunkName, 当前module的chunk名称
@@ -131,6 +131,12 @@ module加载完执行，返回 1 个 options 对象, 包含 5 个属性，详细
 * props, 当前组件的props
 
 `onModuleLoaded(options)`
+
+### onBeforeRender
+
+component render 前执行的回调，返回当前组件对象；
+
+`onBeforeRender(comp)`
 
 
 ## other

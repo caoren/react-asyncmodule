@@ -75,6 +75,7 @@ export const AsyncOperate = {
  * @error `React Element`
  * @delay `number` ms, loading view delay display
  * @timeout `number` ms, load timeout time
+ * @onBeforeRender before component render callback
  */
 const DEFAULTOPTIONS = {
     load: null,
@@ -84,7 +85,8 @@ const DEFAULTOPTIONS = {
     error: null,
     delay: DELAY,
     timeout: TIMEOUT,
-    onModuleLoaded: null
+    onModuleLoaded: null,
+    onBeforeRender: null
 };
 const Dueimport = (option = {}) => {
     const {
@@ -96,7 +98,8 @@ const Dueimport = (option = {}) => {
         timeout,
         resolveWeak,
         chunk,
-        onModuleLoaded
+        onModuleLoaded,
+        onBeforeRender
     } = option;
     if (!load) {
         return null;
@@ -156,6 +159,7 @@ const Dueimport = (option = {}) => {
             if (!comp) {
                 this.loadComp();
             } else {
+                this.beforeRenderCb(comp);
                 this.loadedCb(comp, isServer());
             }
         }
@@ -169,6 +173,12 @@ const Dueimport = (option = {}) => {
                     component: comp,
                     setState: this.changeState
                 });
+            }
+        }
+
+        beforeRenderCb(comp) {
+            if (onBeforeRender) {
+                onBeforeRender(comp);
             }
         }
 
@@ -214,6 +224,7 @@ const Dueimport = (option = {}) => {
             load().then((component) => {
                 this.clearTime();
                 const comp = getModule(component);
+                this.beforeRenderCb(comp);
                 this.changeState({
                     comp,
                     request: false,

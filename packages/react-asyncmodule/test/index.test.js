@@ -68,8 +68,10 @@ describe('AsyncModule memory', () => {
     });
 
     test('client found', (done) => {
-        expect.assertions(5);
+        expect.assertions(6);
+        const mockBeforeRender = jest.fn();
         const mockLoaded = jest.fn(({ component, chunkName, isServer }) => {
+            expect(mockBeforeRender).toHaveBeenCalledTimes(1);
             expect(component).toEqual(Home);
             expect(chunkName).toBe('home');
             expect(isServer).toBeFalsy();
@@ -79,6 +81,7 @@ describe('AsyncModule memory', () => {
             loading: <Loading />,
             error: <ErrorView />,
             timeout: 0,
+            onBeforeRender: mockBeforeRender,
             onModuleLoaded: mockLoaded
         });
         const ViewFirst = AsyncComponent({
