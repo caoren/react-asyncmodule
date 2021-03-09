@@ -22,9 +22,9 @@ const getStrFunc = () => {
                 "} catch (e) {",
                     "reject(e);",
                 "}",
-            "}).on('error', function(e) {",
-                "reject(e);",
-            "});",
+            "})",
+        "}).on('error', function(e) {",
+            "reject(e);",
         "});"
     ].join("");
 }
