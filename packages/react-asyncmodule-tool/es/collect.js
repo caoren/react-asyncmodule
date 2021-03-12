@@ -151,7 +151,7 @@ var Collect = function () {
             // 根据 chunks 从 remotesMap 获取依赖的 federation module
 
             var deps = remotesMap ? chunks.reduce(function (prev, item) {
-                var modules = remotesMap[item];
+                var modules = remotesMap[item] || [];
                 return prev.concat(modules.map(function (item) {
                     return item.name;
                 }));

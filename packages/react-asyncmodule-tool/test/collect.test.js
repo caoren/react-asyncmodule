@@ -152,6 +152,17 @@ describe('federation', () => {
         });
     });
 
+    test('extraStats no remoteMap', () => {
+        const res = createCollect({
+            stats: stats5,
+            chunkName: 'a',
+            extraStats: extraStats,
+            isFederation: true
+        });
+        expect(res.getScripts()).toBe('<script id="__ASYNC_MODULE_NAMES__" type="application/json">["a"]</script><script type="text/javascript" async src="//s.iplay.126.net/t/s/app.js"></script>');
+        expect(res.getStyles()).toBe('<link href="//s.iplay.126.net/t/s/a.css" rel="stylesheet">');
+    });
+
     test('stats css no exist', () => {
         expect.assertions(1);
         const stats51 = clone(stats5);

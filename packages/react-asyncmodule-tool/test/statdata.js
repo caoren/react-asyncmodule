@@ -378,7 +378,15 @@ export const stats5 = {
             ],
             id: 2,
             "parents": [1]
-        }
+        },
+        {
+            "files": [
+                "a.css",
+                "a.js"
+            ],
+            id: 3,
+            "parents": []
+        },
     ],
     entrypoints: {
         app: {
@@ -395,6 +403,15 @@ export const stats5 = {
             assets: [
                 'app.js',
                 'app.js.map'
+            ]
+        },
+        a: {
+            chunks: [3],
+            assets: [
+                'a.js',
+                'a.js.map',
+                'a.css',
+                'a.css.map'
             ]
         },
         b: {

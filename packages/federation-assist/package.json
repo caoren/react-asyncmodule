@@ -1,6 +1,6 @@
 {
   "name": "asyncmodule-federation-webpack-plugin",
-  "version": "1.2.0-beta.5",
+  "version": "1.2.0-beta.6",
   "description": "Federation related webpack plugin",
   "main": "dist/index.js",
   "scripts": {

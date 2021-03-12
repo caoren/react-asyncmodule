@@ -135,7 +135,7 @@ class Collect {
         const { exposesMap, chunks: extraChunks, publicPath: extraPath } = extraStats;
         // 根据 chunks 从 remotesMap 获取依赖的 federation module
         const deps = remotesMap ? chunks.reduce((prev, item) => {
-            const modules = remotesMap[item];
+            const modules = remotesMap[item] || [];
             return prev.concat(modules.map(item => item.name));
         }, []) : [];
         if (deps.length === 0) {
